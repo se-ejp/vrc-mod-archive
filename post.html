@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>改変レシピ詳細 - VRChat改変アーカイブ</title>
+    <style>
+        /* 全体の基本設定 */
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f4f7f6; 
+            color: #333; 
+            line-height: 1.6;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+
+        /* 上段：1と2を横に並べる */
+        .top-row { 
+            display: flex; 
+            gap: 20px; 
+        }
+
+        /* 1. 画像エリア */
+        .section-1 { 
+            flex: 1.5; 
+            background: #2c3e50; 
+            height: 450px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            border-radius: 8px; 
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section-1 img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+        }
+
+        /* 2. アイテム・詳細エリア */
+        .section-2 { 
+            flex: 1; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+
+        /* 3. 解説エリア、4. コメントエリア */
+        .section-3, .section-4 { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+
+        /* 見出しのデザイン */
+        h3 { 
+            border-left: 5px solid #2980b9; 
+            padding-left: 10px; 
+            margin-top: 0; 
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* リンク・リストの設定 */
+        .link-list { list-style: none; padding: 0; }
+        .link-list li { 
+            margin-bottom: 10px; 
+            padding: 5px 0;
+            border-bottom: 1px dotted #eee;
+        }
+        .link-list a { color: #2980b9; text-decoration: none; }
+
+        /* 4. コメント・スレッドのデザイン */
+        .comment-group { margin-bottom: 25px; }
+        
+        .parent-comment { 
+            background: #f9f9f9; 
+            padding: 15px; 
+            border-radius: 8px; 
+        }
+
+        /* 【重要】返信エリアを最初は隠しておく */
+        .reply-area { 
+            display: none; 
+            margin-left: 40px; 
+            border-left: 3px solid #dee2e6; 
+            padding-left: 20px; 
+            margin-top: 15px; 
+        }
+
+        .reply-comment { 
+            background: #ffffff; 
+            padding: 10px; 
+            border: 1px solid #eee; 
+            border-radius: 6px; 
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* 開閉ボタンのデザイン */
+        .toggle-replies-btn {
+            background: none;
+            border: none;
+            color: #065fd4;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-replies-btn:hover { text-decoration: underline; }
+
+        .user-name { font-weight: bold; color: #2c3e50; margin-right: 10px; }
+        .reply-btn { background: none; border: none; color: #7f8c8d; font-size: 13px; cursor: pointer; padding: 0; }
+        .like-section { font-weight: bold; color: #e74c3c; margin-bottom: 15px; }
+
+        /* スマホ対応 */
+        @media (max-width: 768px) {
+            .top-row { flex-direction: column; }
+            .section-1 { height: 300px; }
+        }
+/* ホーム画面に戻るための文字の共通のデザイン↓↓↓↓↓↓ */
+.navbar {
+    background-color: #2c3e50;
+    padding: 15px 0;
+    text-align: center; /* これで文字を真ん中に */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.nav-logo {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.nav-logo:hover {
+    opacity: 0.8; /* 重ねた時に少し色を変える */
+}
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">VRC改変アーカイブ</a>
+</nav>
+    <div class="container">
+        <div class="top-row">
+            <div class="section-1" id="image-container">
+                <p>【1】改変結果の画像（プレビュー）</p>
+            </div>
+
+            <div class="section-2">
+                <h3>【2】投稿内容・使ったもの</h3>
+                <p><span class="user-name">アバター:</span> 森羅 (Shinra)</p>
+                <p><strong>使用アイテム:</strong></p>
+                <ul class="link-list">
+                    <li>・<a href="#">【衣装】サイバーパンクセット</a></li>
+                    <li>・<a href="#">【ツール】Modular Avatar</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-3">
+            <h3>【3】改変方法・こだわり</h3>
+            <p>ここに手順を書きます。</p>
+        </div>
+
+        <div class="section-4">
+            <h3>【4】コメントといいね</h3>
+            <div class="like-section">❤️ 12 Likes</div>
+            
+            <div class="comment-group">
+                <div class="parent-comment">
+                    <span class="user-name">ゲストユーザーA</span>
+                    <p>この色使い、すごくセンスいいですね！</p>
+                    <button class="reply-btn">返信する</button>
+                </div>
+
+                <button class="toggle-replies-btn" onclick="toggleReplies(this)">
+                    ▼ 返信を表示（2件）
+                </button>
+
+                <div class="reply-area">
+                    <div class="reply-comment">
+                        <span class="user-name">投稿者</span>
+                        <p>ありがとうございます！</p>
+                    </div>
+                    <div class="reply-comment">
+                        <span class="user-name">ゲストユーザーB</span>
+                        <p>参考になります！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleReplies(button) {
+            // ボタンの次にある要素（reply-area）を取得
+            const replyArea = button.nextElementSibling;
+            
+            // 表示・非表示を切り替える
+            if (replyArea.style.display === "none" || replyArea.style.display === "") {
+                replyArea.style.display = "block";
+                button.innerText = "▲ 返信を隠す";
+            } else {
+                replyArea.style.display = "none";
+                button.innerText = "▼ 返信を表示（2件）";
+            }
+        }
+    </script>
+</body>
+</html>
