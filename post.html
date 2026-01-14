@@ -2,227 +2,489 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>改変レシピ詳細 - VRChat改変アーカイブ</title>
+    <title>VRC改変アーカイブ - 詳細ページ</title>
     <style>
-        /* 全体の基本設定 */
         body { 
-            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            font-family: sans-serif; 
             margin: 0; 
-            padding: 20px; 
+            padding: 0; 
             background: #f4f7f6; 
             color: #333; 
-            line-height: 1.6;
+            overflow-x: hidden; 
         }
+
+        /* ナビゲーションバー */
+        .navbar { 
+            background: #2c3e50; 
+            padding: 15px 0; 
+            text-align: center; 
+            width: 100%; 
+            margin-bottom: 20px; 
+        }
+
+        .nav-logo { 
+            color: white; 
+            text-decoration: none; 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+        }
+
         .container { 
             max-width: 1000px; 
             margin: auto; 
             display: flex; 
             flex-direction: column; 
             gap: 20px; 
+            padding: 0 20px 40px 20px; 
+            box-sizing: border-box; 
         }
 
-        /* 上段：1と2を横に並べる */
-        .top-row { 
-            display: flex; 
-            gap: 20px; 
-        }
-
-        /* 1. 画像エリア */
-        .section-1 { 
-            flex: 1.5; 
-            background: #2c3e50; 
-            height: 450px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            border-radius: 8px; 
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .section-1 img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
-        }
-
-        /* 2. アイテム・詳細エリア */
-        .section-2 { 
-            flex: 1; 
-            background: white; 
-            padding: 20px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-        }
-
-        /* 3. 解説エリア、4. コメントエリア */
-        .section-3, .section-4 { 
+        .section { 
             background: white; 
             padding: 25px; 
             border-radius: 8px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
         }
 
-        /* 見出しのデザイン */
-        h3 { 
-            border-left: 5px solid #2980b9; 
-            padding-left: 10px; 
-            margin-top: 0; 
-            margin-bottom: 15px;
-            font-size: 1.2rem;
+        /* 編集ボタン周り */
+        .edit-form-box { 
+            display: none; 
+            border: 2px solid #2980b9; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background: white; 
+            margin-bottom: 20px; 
         }
 
-        /* リンク・リストの設定 */
-        .link-list { list-style: none; padding: 0; }
-        .link-list li { 
+        .admin-btn-container { 
+            text-align: left; 
+        }
+
+        .admin-btn { 
+            background: #2980b9; 
+            color: white; 
+            border: none; 
+            padding: 5px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            opacity: 0.8; 
             margin-bottom: 10px; 
-            padding: 5px 0;
-            border-bottom: 1px dotted #eee;
         }
-        .link-list a { color: #2980b9; text-decoration: none; }
 
-        /* 4. コメント・スレッドのデザイン */
-        .comment-group { margin-bottom: 25px; }
-        
+        .admin-btn:hover { 
+            opacity: 1; 
+        }
+
+        /* 画像スライダー */
+        .slider-viewport { 
+            position: relative; 
+            width: 100%; 
+            height: 400px; 
+            background: transparent; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            border: 1px solid #eee; 
+        }
+
+        .slide-track { 
+            display: flex; 
+            transition: transform 0.4s ease-in-out; 
+            height: 100%; 
+        }
+
+        .slide-track img { 
+            min-width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+        }
+
+        .slide-btn { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background: none; 
+            border: none; 
+            color: #333; 
+            font-size: 40px; 
+            cursor: pointer; 
+            z-index: 10; 
+            text-shadow: 0 0 5px rgba(255,255,255,0.8); 
+        }
+
+        .prev { 
+            left: 10px; 
+        }
+
+        .next { 
+            right: 10px; 
+        }
+
+        /* 編集用プレビュー画像 */
+        .preview-container { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            margin-bottom: 10px; 
+        }
+
+        .thumb-wrapper { 
+            position: relative; 
+            width: 60px; 
+            height: 60px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+        }
+
+        .thumb-wrapper img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 4px; 
+        }
+
+        .del-btn { 
+            position: absolute; 
+            top: -5px; 
+            right: -5px; 
+            background: red; 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 18px; 
+            height: 18px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        .drop-zone { 
+            width: 100%; 
+            height: 50px; 
+            border: 2px dashed #2980b9; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #2980b9; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+        }
+
+        input, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+
+        /* URL編集機能 */
+        .url-input-group { 
+            display: flex; 
+            gap: 5px; 
+            margin-bottom: 5px; 
+        }
+
+        .url-btn { 
+            padding: 5px 10px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+
+        .add-url-btn { 
+            background: #27ae60; 
+            color: white; 
+            margin-bottom: 10px; 
+        }
+
+        .remove-url-btn { 
+            background: #e74c3c; 
+            color: white; 
+            height: 38px; 
+        }
+
+        /* 参考リンク表示 */
+        .ref-link-box { 
+            margin-top: 20px; 
+            padding-top: 15px; 
+            border-top: 1px dashed #eee; 
+        }
+
+        .ref-link-box ul { 
+            padding-left: 20px; 
+            margin: 5px 0 0 0; 
+        }
+
+        .ref-link-box a { 
+            color: #2980b9; 
+            text-decoration: none; 
+            font-size: 0.9rem; 
+        }
+
+        .ref-link-box a:hover { 
+            text-decoration: underline; 
+        }
+
+        /* コメント欄 */
+        .comment-group { 
+            margin-top: 15px; 
+            border-top: 1px solid #eee; 
+            padding-top: 15px; 
+        }
+
         .parent-comment { 
             background: #f9f9f9; 
             padding: 15px; 
             border-radius: 8px; 
+            margin-bottom: 10px; 
         }
 
-        /* 【重要】返信エリアを最初は隠しておく */
         .reply-area { 
             display: none; 
             margin-left: 40px; 
             border-left: 3px solid #dee2e6; 
             padding-left: 20px; 
-            margin-top: 15px; 
         }
 
-        .reply-comment { 
-            background: #ffffff; 
-            padding: 10px; 
-            border: 1px solid #eee; 
-            border-radius: 6px; 
-            margin-bottom: 10px;
-            font-size: 0.95rem;
+        .toggle-replies-btn { 
+            background: none; 
+            border: none; 
+            color: #065fd4; 
+            cursor: pointer; 
+            font-weight: bold; 
         }
-
-        /* 開閉ボタンのデザイン */
-        .toggle-replies-btn {
-            background: none;
-            border: none;
-            color: #065fd4;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 10px 0;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-        }
-        .toggle-replies-btn:hover { text-decoration: underline; }
-
-        .user-name { font-weight: bold; color: #2c3e50; margin-right: 10px; }
-        .reply-btn { background: none; border: none; color: #7f8c8d; font-size: 13px; cursor: pointer; padding: 0; }
-        .like-section { font-weight: bold; color: #e74c3c; margin-bottom: 15px; }
-
-        /* スマホ対応 */
-        @media (max-width: 768px) {
-            .top-row { flex-direction: column; }
-            .section-1 { height: 300px; }
-        }
-/* ホーム画面に戻るための文字の共通のデザイン↓↓↓↓↓↓ */
-.navbar {
-    background-color: #2c3e50;
-    padding: 15px 0;
-    text-align: center; /* これで文字を真ん中に */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
-
-.nav-logo {
-    color: white;
-    text-decoration: none;
-    font-size: 1.5rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.nav-logo:hover {
-    opacity: 0.8; /* 重ねた時に少し色を変える */
-}
     </style>
 </head>
 <body>
+
 <nav class="navbar">
     <a href="index.html" class="nav-logo">VRC改変アーカイブ</a>
 </nav>
-    <div class="container">
-        <div class="top-row">
-            <div class="section-1" id="image-container">
-                <p>【1】改変結果の画像（プレビュー）</p>
-            </div>
 
-            <div class="section-2">
-                <h3>【2】投稿内容・使ったもの</h3>
-                <p><span class="user-name">アバター:</span> 森羅 (Shinra)</p>
-                <p><strong>使用アイテム:</strong></p>
-                <ul class="link-list">
-                    <li>・<a href="#">【衣装】サイバーパンクセット</a></li>
-                    <li>・<a href="#">【ツール】Modular Avatar</a></li>
-                </ul>
+<div class="container">
+    <div class="admin-btn-container">
+        <button class="admin-btn" onclick="toggleEditForm()">✎ 投稿内容を編集する</button>
+    </div>
+
+    <div id="edit-form" class="edit-form-box">
+        <h3>投稿の編集</h3>
+        <label>メイン画像</label>
+        <div id="prev-main" class="preview-container"></div>
+        <div id="drop-main" class="drop-zone">画像をドロップ</div>
+        
+        <label>アバター名</label>
+        <input type="text" id="input-avatar" placeholder="例：マヌカ">
+
+        <label>参考にした投稿 (URL)</label>
+        <div id="url-input-list">
             </div>
+        <button type="button" class="url-btn add-url-btn" onclick="addUrlInput('')">＋ URLを追加</button><br>
+        
+        <label>解説画像</label>
+        <div id="prev-sub" class="preview-container"></div>
+        <div id="drop-sub" class="drop-zone">画像をドロップ</div>
+        
+        <label>解説テキスト</label>
+        <textarea id="input-method" rows="4" placeholder="改変の手順を入力してください"></textarea>
+        
+        <button onclick="updatePost()" style="background: #27ae60; color: white; padding: 12px; border: none; border-radius: 5px; width: 100%; cursor: pointer; font-weight: bold;">保存して反映</button>
+    </div>
+
+    <div style="display: flex; gap: 20px;">
+        <div class="slider-viewport" style="flex: 1.5;">
+            <button class="slide-btn prev" onclick="moveSlide('main', -1)">❮</button>
+            <div class="slide-track" id="main-track"></div>
+            <button class="slide-btn next" onclick="moveSlide('main', 1)">❯</button>
         </div>
-
-        <div class="section-3">
-            <h3>【3】改変方法・こだわり</h3>
-            <p>ここに手順を書きます。</p>
-        </div>
-
-        <div class="section-4">
-            <h3>【4】コメントといいね</h3>
-            <div class="like-section">❤️ 12 Likes</div>
-            
-            <div class="comment-group">
-                <div class="parent-comment">
-                    <span class="user-name">ゲストユーザーA</span>
-                    <p>この色使い、すごくセンスいいですね！</p>
-                    <button class="reply-btn">返信する</button>
-                </div>
-
-                <button class="toggle-replies-btn" onclick="toggleReplies(this)">
-                    ▼ 返信を表示（2件）
-                </button>
-
-                <div class="reply-area">
-                    <div class="reply-comment">
-                        <span class="user-name">投稿者</span>
-                        <p>ありがとうございます！</p>
-                    </div>
-                    <div class="reply-comment">
-                        <span class="user-name">ゲストユーザーB</span>
-                        <p>参考になります！</p>
-                    </div>
-                </div>
-            </div>
+        <div class="section" style="flex: 1;">
+            <h3>詳細</h3>
+            <p>アバター: <span id="display-avatar">（未入力）</span></p>
         </div>
     </div>
 
-    <script>
-        function toggleReplies(button) {
-            // ボタンの次にある要素（reply-area）を取得
-            const replyArea = button.nextElementSibling;
-            
-            // 表示・非表示を切り替える
-            if (replyArea.style.display === "none" || replyArea.style.display === "") {
-                replyArea.style.display = "block";
-                button.innerText = "▲ 返信を隠す";
-            } else {
-                replyArea.style.display = "none";
-                button.innerText = "▼ 返信を表示（2件）";
+    <div class="section">
+        <h3>改変方法</h3>
+        <p id="display-text">手順がここに表示されます。</p>
+        <div id="sub-slider-container" class="slider-viewport" style="height: 300px; display: none; margin-bottom: 15px;">
+            <button class="slide-btn prev" onclick="moveSlide('sub', -1)">❮</button>
+            <div class="slide-track" id="sub-track"></div>
+            <button class="slide-btn next" onclick="moveSlide('sub', 1)">❯</button>
+        </div>
+
+        <div id="ref-box" class="ref-link-box" style="display: none;">
+            <strong>参考にした投稿:</strong>
+            <ul id="display-ref-list"></ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>コメント</h3>
+        <div class="comment-group">
+            <div class="parent-comment"><strong>ユーザーA:</strong> わかりやすいですね！</div>
+            <button class="toggle-replies-btn" onclick="toggleReplies(this)">▼ 返信を表示</button>
+            <div class="reply-area">
+                <p><strong>投稿者:</strong> ありがとうございます！</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // refUrlsを配列で持つように変更
+    let postData = { avatarName: "", refUrls: [], methodText: "", mainImgs: [], subImgs: [] };
+    const currentPos = { main: 0, sub: 0 };
+
+    window.onload = () => {
+        const saved = localStorage.getItem('vrc_post_data');
+        if (saved) {
+            postData = JSON.parse(saved);
+            // 互換性のため、古い形式のデータ（単一のURL）があれば配列に変換
+            if (postData.refUrl && !postData.refUrls) {
+                postData.refUrls = [postData.refUrl];
             }
+            if (!postData.refUrls) postData.refUrls = [];
+            
+            document.getElementById('input-avatar').value = postData.avatarName || "";
+            document.getElementById('input-method').value = postData.methodText || "";
+            
+            // URL入力欄の生成
+            const list = document.getElementById('url-input-list');
+            list.innerHTML = "";
+            if (postData.refUrls.length === 0) {
+                addUrlInput(''); // 最初の一つを表示
+            } else {
+                postData.refUrls.forEach(url => addUrlInput(url));
+            }
+
+            renderAll();
+            updatePreview('main');
+            updatePreview('sub');
+        } else {
+            addUrlInput(''); // 新規時
         }
-    </script>
+    };
+
+    // URL入力欄を追加する関数
+    function addUrlInput(value = '') {
+        const list = document.getElementById('url-input-list');
+        const div = document.createElement('div');
+        div.className = 'url-input-group';
+        div.innerHTML = `
+            <input type="url" class="ref-url-input" value="${value}" placeholder="https://...">
+            <button type="button" class="url-btn remove-url-btn" onclick="this.parentElement.remove()">－</button>
+        `;
+        list.appendChild(div);
+    }
+
+    function toggleEditForm() {
+        const f = document.getElementById('edit-form');
+        f.style.display = (f.style.display === "none" || f.style.display === "") ? "block" : "none";
+    }
+
+    function toggleReplies(btn) {
+        const area = btn.nextElementSibling;
+        const isHidden = area.style.display === "none" || area.style.display === "";
+        area.style.display = isHidden ? "block" : "none";
+        btn.innerText = isHidden ? "▲ 返信を隠す" : "▼ 返信を表示";
+    }
+
+    function updatePreview(key) {
+        const imgs = key === 'main' ? postData.mainImgs : postData.subImgs;
+        const p = document.getElementById(key === 'main' ? 'prev-main' : 'prev-sub');
+        p.innerHTML = imgs.map((src, i) => `
+            <div class="thumb-wrapper">
+                <img src="${src}">
+                <button class="del-btn" onclick="removeImg('${key}', ${i})">×</button>
+            </div>
+        `).join('');
+    }
+
+    window.removeImg = (key, index) => {
+        if (key === 'main') postData.mainImgs.splice(index, 1);
+        else postData.subImgs.splice(index, 1);
+        updatePreview(key);
+    };
+
+    ['main', 'sub'].forEach(key => {
+        const z = document.getElementById('drop-' + key);
+        z.ondragover = e => e.preventDefault();
+        z.ondrop = e => {
+            e.preventDefault();
+            [...e.dataTransfer.files].forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const r = new FileReader();
+                    r.onload = ev => { 
+                        if (key === 'main') postData.mainImgs.push(ev.target.result);
+                        else postData.subImgs.push(ev.target.result);
+                        updatePreview(key); 
+                    };
+                    r.readAsDataURL(file);
+                }
+            });
+        };
+    });
+
+    window.moveSlide = (key, dir) => {
+        const imgs = key === 'main' ? postData.mainImgs : postData.subImgs;
+        if (imgs.length <= 1) return;
+        currentPos[key] = (currentPos[key] + dir + imgs.length) % imgs.length;
+        document.getElementById(key + '-track').style.transform = `translateX(-${currentPos[key] * 100}%)`;
+    };
+
+    function renderAll() {
+        document.getElementById('display-avatar').innerText = postData.avatarName || "（未入力）";
+        
+        // 参考リンクをリストで表示
+        const refBox = document.getElementById('ref-box');
+        const refList = document.getElementById('display-ref-list');
+        refList.innerHTML = "";
+        
+        if (postData.refUrls && postData.refUrls.length > 0) {
+            refBox.style.display = "block";
+            postData.refUrls.forEach(url => {
+                if(url.trim()){
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+                    refList.appendChild(li);
+                }
+            });
+        } else {
+            refBox.style.display = "none";
+        }
+
+        document.getElementById('display-text').innerText = postData.methodText || "手順がここに表示されます。";
+        document.getElementById('main-track').innerHTML = postData.mainImgs.map(src => `<img src="${src}">`).join('');
+        
+        const subTrack = document.getElementById('sub-track');
+        const subContainer = document.getElementById('sub-slider-container');
+        if (postData.subImgs.length > 0) {
+            subContainer.style.display = "block";
+            subTrack.innerHTML = postData.subImgs.map(src => `<img src="${src}">`).join('');
+        } else {
+            subContainer.style.display = "none";
+        }
+    }
+
+    function updatePost() {
+        postData.avatarName = document.getElementById('input-avatar').value;
+        postData.methodText = document.getElementById('input-method').value;
+        
+        // 入力されているURLをすべて取得して配列に入れる
+        const urlInputs = document.querySelectorAll('.ref-url-input');
+        postData.refUrls = Array.from(urlInputs).map(input => input.value).filter(val => val.trim() !== "");
+        
+        localStorage.setItem('vrc_post_data', JSON.stringify(postData));
+        renderAll();
+        toggleEditForm();
+        alert("保存しました！");
+    }
+</script>
 </body>
 </html>
