@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>VRC改変アーカイブ - 新規投稿</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f4f7f6; 
+            color: #333; 
+        }
+        .navbar { 
+            background: #2c3e50; 
+            padding: 15px 0; 
+            text-align: center; 
+            width: 100%; 
+            margin-bottom: 20px; 
+        }
+        .nav-logo { 
+            color: white; 
+            text-decoration: none; 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: auto; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
+        .section { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        h2 { 
+            margin-top: 0; 
+            color: #2c3e50; 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 10px; 
+        }
+        label { 
+            display: block; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+        }
+        /* 入力欄のスタイル調整 */
+        input[type="text"], input[type="url"], textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 1rem;
+        }
+        /* タイトル専用の強調スタイル */
+        #post-title {
+            border: 1px solid #2980b9;
+            font-size: 1.2rem;
+        }
+        .drop-zone { 
+            width: 100%; 
+            height: 80px; 
+            border: 2px dashed #2980b9; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #2980b9; 
+            cursor: pointer; 
+            margin-top: 5px; 
+        }
+        .preview-container { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            margin: 10px 0; 
+        }
+        .thumb-wrapper { 
+            position: relative; 
+            width: 80px; 
+            height: 80px; 
+        }
+        .thumb-wrapper img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 4px; 
+        }
+        .del-btn { 
+            position: absolute; 
+            top: -5px; 
+            right: -5px; 
+            background: red; 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            cursor: pointer; 
+        }
+        .url-group { 
+            display: flex; 
+            gap: 5px; 
+            margin-bottom: 5px; 
+        }
+        .btn { 
+            padding: 12px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        .btn-add { 
+            background: #27ae60; 
+            color: white; 
+            width: 100%; 
+            margin-top: 10px; 
+        }
+        .btn-submit { 
+            background: #2980b9; 
+            color: white; 
+            width: 100%; 
+            margin-top: 30px; 
+            font-size: 1.1rem; 
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">VRC改変アーカイブ</a>
+</nav>
+
+<div class="container">
+    <div class="section">
+        <h2>新規投稿を作成</h2>
+        
+        <label>投稿タイトル</label>
+        <input type="text" id="post-title" placeholder="例：サイバーパンク風マヌカ改変">
+
+        <label>アバター名</label>
+        <input type="text" id="avatar-name" placeholder="例：マヌカ">
+
+        <label>メイン画像（複数可）</label>
+        <div id="preview-main" class="preview-container"></div>
+        <div id="drop-main" class="drop-zone">画像をここにドロップ</div>
+
+        <label>参考URL</label>
+        <div id="url-list"></div>
+        <button class="btn btn-add" onclick="addUrlInput()">＋ URLを追加</button>
+
+        <label>解説画像</label>
+        <div id="preview-sub" class="preview-container"></div>
+        <div id="drop-sub" class="drop-zone">画像をここにドロップ</div>
+
+        <label>解説テキスト</label>
+        <textarea id="method-text" rows="6" placeholder="改変のポイントや手順を入力してください"></textarea>
+
+        <button class="btn btn-submit" onclick="saveNewPost()">投稿を保存する</button>
+    </div>
+</div>
+
+<script>
+    let newData = { mainImgs: [], subImgs: [] };
+
+    function addUrlInput(val = "") {
+        const container = document.getElementById('url-list');
+        const div = document.createElement('div');
+        div.className = 'url-group';
+        div.innerHTML = `
+            <input type="url" class="url-input" value="${val}" placeholder="https://...">
+            <button class="btn" style="background:#e74c3c; color:white;" onclick="this.parentElement.remove()">ー</button>
+        `;
+        container.appendChild(div);
+    }
+
+    ['main', 'sub'].forEach(key => {
+        const zone = document.getElementById('drop-' + key);
+        zone.ondragover = e => e.preventDefault();
+        zone.ondrop = e => {
+            e.preventDefault();
+            [...e.dataTransfer.files].forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const r = new FileReader();
+                    r.onload = ev => {
+                        newData[key + 'Imgs'].push(ev.target.result);
+                        renderPreviews(key);
+                    };
+                    r.readAsDataURL(file);
+                }
+            });
+        };
+    });
+
+    function renderPreviews(key) {
+        const container = document.getElementById('preview-' + key);
+        container.innerHTML = newData[key + 'Imgs'].map((src, i) => `
+            <div class="thumb-wrapper">
+                <img src="${src}">
+                <button class="del-btn" onclick="removeImg('${key}', ${i})">×</button>
+            </div>
+        `).join('');
+    }
+
+    function removeImg(key, i) {
+        newData[key + 'Imgs'].splice(i, 1);
+        renderPreviews(key);
+    }
+
+    function saveNewPost() {
+        const title = document.getElementById('post-title').value; // タイトル取得
+        const name = document.getElementById('avatar-name').value;
+        const method = document.getElementById('method-text').value;
+        const urls = Array.from(document.querySelectorAll('.url-input')).map(i => i.value).filter(v => v.trim());
+
+        if (!title) return alert("タイトルを入力してください");
+        if (!name) return alert("アバター名を入力してください");
+
+        const post = {
+            id: Date.now(),
+            title: title, // 保存データに追加
+            avatarName: name,
+            methodText: method,
+            refUrls: urls,
+            mainImgs: newData.mainImgs,
+            subImgs: newData.subImgs
+        };
+
+        let allPosts = JSON.parse(localStorage.getItem('vrc_posts_list') || "[]");
+        allPosts.push(post);
+        localStorage.setItem('vrc_posts_list', JSON.stringify(allPosts));
+
+        alert("投稿しました！一覧へ戻ります。");
+        location.href = "index.html";
+    }
+
+    addUrlInput();
+</script>
+
+</body>
+</html>
