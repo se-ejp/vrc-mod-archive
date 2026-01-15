@@ -7,7 +7,8 @@
         ],
         "methodText": "va",
         "refUrls": [
-            "va"
+            "va",
+            "cacaa"
         ],
         "subImgs": [],
         "title": "りゅうちゃんです",
@@ -15,6 +16,40 @@
             {
                 "name": "りゅうちゃん",
                 "url": "https://www.youtube.com/shorts/fPpsDgmuPi4"
+            }
+        ]
+    },
+    {
+        "avatarName": "あ",
+        "id": 1768484178148,
+        "mainImgs": [
+            "/static/uploads/2026-01-15/1768484177_スクリーンショット 2025-07-11 224507.png"
+        ],
+        "methodText": "",
+        "refUrls": [],
+        "subImgs": [],
+        "title": "11時28っぷん",
+        "usedItems": [
+            {
+                "name": "",
+                "url": ""
+            }
+        ]
+    },
+    {
+        "avatarName": "ありがとう",
+        "id": 1768484198876,
+        "mainImgs": [
+            "/static/uploads/2026-01-15/1768484197_スクリーンショット 2025-07-25 112408.png"
+        ],
+        "methodText": "",
+        "refUrls": [],
+        "subImgs": [],
+        "title": "ありがとうあ",
+        "usedItems": [
+            {
+                "name": "んあ",
+                "url": "んお"
             }
         ]
     }

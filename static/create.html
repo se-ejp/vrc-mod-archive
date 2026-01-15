@@ -2,65 +2,134 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>VRC改変アーカイブ - 新規作成</title>
-    <style>
-        /* スタイルは一切変更なしなのでそのまま維持してください */
-        body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f7f6; color: #333; }
-        .navbar { background: #2c3e50; padding: 15px 0; text-align: center; margin-bottom: 20px; }
-        .nav-logo { color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold; }
-        .container { max-width: 800px; margin: auto; padding: 0 20px 40px 20px; }
-        .section-title { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-top: 30px; }
-        .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
-        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .drop-zone { width: 100%; height: 70px; border: 2px dashed #2980b9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #2980b9; cursor: pointer; background: #f9fbff; margin-top: 10px; }
-        .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-        .thumb-wrapper { position: relative; width: 80px; height: 80px; }
-        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
-        .del-btn { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; }
-        .used-item-row { display: flex; gap: 5px; margin-bottom: 5px; }
-        .used-item-row input:nth-child(1) { flex: 1; }
-        .used-item-row input:nth-child(2) { flex: 2; }
-        .btn-add { background: #29b929; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
-        .btn-delete { background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
-        .btn-save { background: #2980b9; color: white; padding: 15px; width: 100%; border: none; border-radius: 4px; margin-top: 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .btn-save:hover { opacity: 0.9; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>新規投稿 - VRC改変アーカイブ</title>
+<style>
+    /* 共通背景・全体設定 */
+    body { font-family: sans-serif; margin: 0; background-color: #0b0e1a; color: #e0e6ed; min-height: 100vh; overflow-y: auto; }
+    .bg-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 125vh; z-index: -1; background-image: url('bg-pattern.jpg'); background-size: cover; pointer-events: none; }
+    
+    .navbar { background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); padding: 15px 0; text-align: center; border-bottom: 1px solid rgba(0, 242, 255, 0.2); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #00f2ff; text-decoration: none; font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
+
+    .container { max-width: 800px; margin: auto; padding: 20px 20px 60px 20px; box-sizing: border-box; }
+    h1 { color: #fff; text-shadow: 0 0 8px rgba(0, 255, 255, 0.8); text-align: center; margin-bottom: 30px; }
+
+    /* スラッシュカットパネル */
+    .form-panel { 
+        position: relative;
+        padding: 40px; 
+        background: #00f2ff; 
+        clip-path: polygon(50px 0%, 100% 0%, 100% calc(100% - 50px), calc(100% - 50px) 100%, 0% 100%, 0% 50px);
+        margin-bottom: 30px;
+    }
+    .form-panel::before {
+        content: ""; position: absolute;
+        top: 2px; left: 2px; right: 2px; bottom: 2px;
+        background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+        clip-path: inherit; z-index: 1;
+    }
+    .form-content { position: relative; z-index: 2; }
+
+    /* 入力パーツ */
+    label { display: block; margin-top: 20px; margin-bottom: 8px; color: #00f2ff; font-weight: bold; font-size: 0.9rem; }
+    
+    input[type="text"], input[type="url"], textarea {
+        width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; 
+        color: #fff; /* 入力した文字色 */
+        box-sizing: border-box; outline: none;
+    }
+
+    /* ★プレースホルダー（ヒント文字）を白にする設定 */
+    input::placeholder, 
+    textarea::placeholder {
+        color: #ffffff !important;
+        opacity: 1; /* ブラウザ標準の透明化を無効にする */
+    }
+
+    input:focus, textarea:focus { border-color: #00f2ff; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+
+    /* 以下、機能パーツのスタイル（変更なし） */
+    .used-item-row, .url-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .used-item-row input:nth-child(1) { flex: 1; }
+    .used-item-row input:nth-child(2) { flex: 2; }
+
+    .drop-zone {
+        border: 2px dashed rgba(0, 242, 255, 0.5); border-radius: 8px;
+        padding: 30px; text-align: center; background: rgba(0, 242, 255, 0.05);
+        cursor: pointer; transition: 0.3s; color: #a0aec0;
+    }
+    .drop-zone:hover { background: rgba(0, 242, 255, 0.15); border-color: #00f2ff; color: #fff; }
+
+    .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .thumb-wrapper { position: relative; width: 100px; height: 100px; }
+    .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border: 1px solid #00f2ff; border-radius: 4px; }
+    .del-btn { position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; }
+
+    .btn-add { background: rgba(0, 242, 255, 0.15); color: #00f2ff; border: 1px solid #00f2ff; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 5px; transition: 0.3s; font-size: 0.85rem; }
+    .btn-add:hover { background: #00f2ff; color: #0b0e1a; }
+    .btn-delete { background: rgba(255, 77, 77, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d; padding: 0 15px; border-radius: 4px; cursor: pointer; }
+
+    .submit-btn {
+        width: 100%; padding: 18px; margin-top: 40px;
+        background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        color: white; font-weight: bold; border: none;
+        clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+        cursor: pointer; transition: 0.3s; font-size: 1.1rem;
+    }
+    .submit-btn:hover { transform: scale(1.02); filter: brightness(1.2); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+
+    @media (max-width: 768px) {
+        .form-panel { padding: 25px 15px; clip-path: polygon(30px 0%, 100% 0%, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0% 100%, 0% 30px); }
+        .used-item-row { flex-direction: column; }
+    }
+</style>
 </head>
 <body>
 
+<div class="bg-fixed"></div>
 <nav class="navbar"><a href="index.html" class="nav-logo">VRC改変アーカイブ</a></nav>
 
 <div class="container">
-    <h2 class="section-title">新規投稿を作成</h2>
-    
-    <div class="form-box">
-        <label>タイトル</label>
-        <input type="text" id="input-title" placeholder="例：黒を基調としたパーティードレス改変">
-        <label>アバター名</label>
-        <input type="text" id="input-avatar" placeholder="使用したアバターの名前">
-        <label>使用したもの（名前とURL）</label>
-        <div id="used-items-list"></div>
-        <button onclick="addUsedItemInput()" class="btn-add">＋ アイテムを追加</button>
-        <label>メイン画像</label>
-        <div id="preview-main" class="preview-container"></div>
-        <div id="drop-main" class="drop-zone" onclick="document.getElementById('file-main').click()">画像をドロップまたはクリック</div>
-        <input type="file" id="file-main" multiple style="display:none" onchange="handleFiles(this.files, 'main')">
-        <label>解説画像（手順の説明など）</label>
-        <div id="preview-sub" class="preview-container"></div>
-        <div id="drop-sub" class="drop-zone" onclick="document.getElementById('file-sub').click()">画像をドロップまたはクリック</div>
-        <input type="file" id="file-sub" multiple style="display:none" onchange="handleFiles(this.files, 'sub')">
-        <label>解説テキスト</label>
-        <textarea id="input-method" rows="8" placeholder="改変のコツや手順、質問をメモしてください"></textarea>
-        <label>参考投稿（URL）</label>
-        <div id="url-list"></div>
-        <button onclick="addUrlInput()" class="btn-add">＋ URLを追加</button>
-        <button onclick="savePost()" class="btn-save">投稿を保存する</button>
+    <h1>新規投稿を作成</h1>
+
+    <div class="form-panel">
+        <div class="form-content">
+            <label>タイトル</label>
+            <input type="text" id="input-title" placeholder="例：黒を基調としたパーティードレス改変">
+
+            <label>アバター名</label>
+            <input type="text" id="input-avatar" placeholder="使用したアバターの名前">
+
+            <label>使用したもの（名前とURL）</label>
+            <div id="used-items-list"></div>
+            <button onclick="addUsedItemInput()" class="btn-add">＋ アイテムを追加</button>
+
+            <label>メイン画像</label>
+            <div id="preview-main" class="preview-container"></div>
+            <div id="drop-main" class="drop-zone" onclick="document.getElementById('file-main').click()">画像をドロップまたはクリック</div>
+            <input type="file" id="file-main" multiple style="display:none" onchange="handleFiles(this.files, 'main')">
+
+            <label>解説画像（手順の説明など）</label>
+            <div id="preview-sub" class="preview-container"></div>
+            <div id="drop-sub" class="drop-zone" onclick="document.getElementById('file-sub').click()">画像をドロップまたはクリック</div>
+            <input type="file" id="file-sub" multiple style="display:none" onchange="handleFiles(this.files, 'sub')">
+
+            <label>解説テキスト</label>
+            <textarea id="input-method" rows="8" placeholder="改変のコツや手順をメモしてください"></textarea>
+
+            <label>参考投稿（URL）</label>
+            <div id="url-list"></div>
+            <button onclick="addUrlInput()" class="btn-add">＋ URLを追加</button>
+
+            <button onclick="savePost()" class="submit-btn">投稿を保存する</button>
+        </div>
     </div>
 </div>
 
 <script>
-    let postData = { title: "", avatarName: "", usedItems: [], mainImgs: [], subImgs: [], methodText: "", refUrls: [] };
+    let postData = { mainImgs: [], subImgs: [] };
 
     function addUsedItemInput(name = "", url = "") {
         const div = document.createElement('div');
@@ -75,47 +144,35 @@
 
     function addUrlInput(val = "") {
         const div = document.createElement('div');
-        div.style.display = "flex"; div.style.gap = "5px"; div.style.marginBottom = "5px";
+        div.className = 'url-row';
         div.innerHTML = `
-            <input type="url" class="url-input" value="${val}" style="flex:1" placeholder="https://...">
+            <input type="url" class="url-input" value="${val}" placeholder="https://...">
             <button class="btn-delete" onclick="this.parentElement.remove()">ー</button>
         `;
         document.getElementById('url-list').appendChild(div);
     }
 
-    // ★ フォルダ保存対応版：画像を選んだらすぐにサーバーへアップロードする
     function handleFiles(files, key) {
         [...files].forEach(file => {
             const formData = new FormData();
             formData.append('image', file);
-
-            // サーバー（app.pyの/api/upload）に送信
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('/api/upload', { method: 'POST', body: formData })
             .then(res => res.json())
             .then(data => {
                 if (data.url) {
-                    // サーバーから返ってきたURL（/static/uploads/◯◯.jpg）を保存
                     postData[key + 'Imgs'].push(data.url);
                     renderPreviews(key);
                 }
             })
-            .catch(err => {
-                console.error("アップロード失敗:", err);
-                alert("画像のアップロードに失敗しました。");
-            });
+            .catch(err => alert("アップロード失敗"));
         });
     }
 
     ['main', 'sub'].forEach(key => {
         const zone = document.getElementById(`drop-${key}`);
-        if(zone) {
-            zone.ondragover = e => { e.preventDefault(); zone.style.background = "#eef7ff"; };
-            zone.ondragleave = () => { zone.style.background = "#f9fbff"; };
-            zone.ondrop = e => { e.preventDefault(); zone.style.background = "#f9fbff"; handleFiles(e.dataTransfer.files, key); };
-        }
+        zone.ondragover = e => { e.preventDefault(); zone.style.background = "rgba(0, 242, 255, 0.2)"; };
+        zone.ondragleave = () => { zone.style.background = "rgba(0, 242, 255, 0.05)"; };
+        zone.ondrop = e => { e.preventDefault(); zone.style.background = "rgba(0, 242, 255, 0.05)"; handleFiles(e.dataTransfer.files, key); };
     });
 
     function renderPreviews(key) {
@@ -126,7 +183,6 @@
             </div>
         `).join('');
     }
-
     function removeImg(key, i) { postData[key + 'Imgs'].splice(i, 1); renderPreviews(key); }
 
     function savePost() {
@@ -161,13 +217,10 @@
             .then(result => {
                 if(result.status === "success") {
                     alert("サーバーに保存しました！");
-                    window.location.href = "list.html";
+                    window.location.href = "index.html";
                 }
             })
-            .catch(err => {
-                console.error("通信エラー:", err);
-                alert("保存に失敗しました。");
-            });
+            .catch(err => alert("保存に失敗しました"));
     }
 
     window.onload = () => { addUsedItemInput(); addUrlInput(); };

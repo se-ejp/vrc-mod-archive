@@ -2,115 +2,126 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VRC改変アーカイブ - 投稿一覧</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f4f7f6;
-            color: #333;
-        }
-        .navbar {
-            background: #2c3e50;
-            padding: 15px 0;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .nav-logo {
-            color: white;
-            text-decoration: none;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 0 20px 40px 20px;
-        }
-        .header-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .btn-create {
-            background: #2980b9;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .post-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        .post-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .post-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .card-img {
-            width: 100%;
-            height: 180px;
-            background: #eee;
-            object-fit: cover;
-        }
-        .card-body {
-            padding: 15px;
-        }
-        .card-title {
-            margin: 0 0 10px 0;
-            font-size: 1.1rem;
-            color: #2c3e50;
-            font-weight: bold;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .card-avatar {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .card-date {
-            font-size: 0.8rem;
-            color: #999;
-            text-align: right;
-        }
-        .empty-message {
-            text-align: center;
-            padding: 50px;
-            color: #888;
-            grid-column: 1 / -1;
-        }
-    </style>
+<style>
+    /* 共通背景・全体設定 */
+    body { font-family: sans-serif; margin: 0; background-color: #0b0e1a; color: #e0e6ed; min-height: 100vh; overflow-y: auto; }
+    .bg-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 125vh; z-index: -1; background-image: url('bg-pattern.jpg'); background-size: cover; pointer-events: none; }
+    
+    .navbar { background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); padding: 15px 0; text-align: center; border-bottom: 1px solid rgba(0, 242, 255, 0.2); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #00f2ff; text-decoration: none; font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
+
+    .container { max-width: 1000px; margin: auto; padding: 0 20px 100px 20px; box-sizing: border-box; }
+    
+    .header-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 40px 0 30px 0;
+    }
+    h2 { color: #fff; text-shadow: 0 0 8px rgba(0, 255, 255, 0.8); margin: 0; }
+
+    /* ★右下固定：indexと同じカプセル型デザイン */
+    .fab-button { 
+        position: fixed; 
+        right: 30px; 
+        bottom: 30px; 
+        background: linear-gradient(135deg, #00f2ff, #0066ff); 
+        color: white; 
+        padding: 15px 25px; 
+        border-radius: 50px; /* indexと同じ角丸設定 */
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); 
+        z-index: 1000; 
+        transition: all 0.3s; 
+        font-weight: bold; 
+        text-decoration: none; 
+    }
+    .fab-button:hover { 
+        transform: scale(1.05); 
+        filter: drop-shadow(0 0 12px #00f2ff) brightness(1.2); 
+    }
+
+    /* 投稿グリッド */
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    /* 投稿カード */
+    .post-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s;
+        backdrop-filter: blur(5px);
+    }
+    .post-card:hover {
+        transform: translateY(-5px);
+        border-color: #00f2ff;
+        box-shadow: 0 5px 20px rgba(0, 242, 255, 0.2);
+    }
+    .card-img {
+        width: 100%;
+        height: 180px;
+        background: #1a1f2e;
+        object-fit: cover;
+    }
+    .card-body { padding: 15px; }
+    .card-title {
+        margin: 0 0 5px 0;
+        font-size: 1.1rem;
+        color: #fff;
+        font-weight: bold;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-bottom: 8px; }
+    .card-date { font-size: 0.8rem; color: #718096; text-align: right; }
+
+    .empty-message {
+        text-align: center;
+        padding: 80px 20px;
+        color: #718096;
+        grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+        .fab-text { display: none; }
+        .fab-button { right: 20px; bottom: 20px; padding: 15px; }
+        .post-grid { grid-template-columns: 1fr; }
+    }
+</style>
 </head>
 <body>
 
+<div class="bg-fixed"></div>
 <nav class="navbar"><a href="index.html" class="nav-logo">VRC改変アーカイブ</a></nav>
 
 <div class="container">
     <div class="header-area">
         <h2>改変アーカイブ一覧</h2>
-        <a href="create.html" class="btn-create">＋ 新規作成</a>
     </div>
 
     <div id="post-list" class="post-grid">
         </div>
 </div>
+
+<a href="create.html" class="fab-button">
+    <span class="fab-icon">＋</span>
+    <span class="fab-text">新規投稿</span>
+</a>
 
 <script>
     window.onload = () => {
@@ -126,7 +137,6 @@
                     return;
                 }
 
-                // IDが大きい順（新しい順）に並べ替え
                 allPosts.sort((a, b) => b.id - a.id).forEach(post => {
                     const card = document.createElement('a');
                     card.className = 'post-card';
@@ -134,9 +144,8 @@
 
                     const thumb = (post.mainImgs && post.mainImgs.length > 0) 
                                   ? post.mainImgs[0] 
-                                  : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23eee"/></svg>';
+                                  : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%231a1f2e"/></svg>';
 
-                    // 日付の変換でエラーが起きないように工夫
                     let dateStr = "不明";
                     try {
                         dateStr = new Date(post.id).toLocaleDateString();
@@ -155,7 +164,7 @@
             })
             .catch(err => {
                 console.error("Fetch error:", err);
-                postListArea.innerHTML = "<p>読み込み失敗</p>";
+                postListArea.innerHTML = "<p style='text-align:center;'>読み込み失敗</p>";
             });
     };
 </script>

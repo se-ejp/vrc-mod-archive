@@ -2,57 +2,133 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VRC改変アーカイブ - 詳細</title>
-    <style>
-        /* --- 既存のスタイルは維持 --- */
-        body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f7f6; color: #333; }
-        .navbar { background: #2c3e50; padding: 15px 0; text-align: center; margin-bottom: 20px; }
-        .nav-logo { color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold; }
-        .container { max-width: 1000px; margin: auto; padding: 0 20px 40px 20px; }
-        .btn-back { display: inline-block; text-decoration: none; color: #7f8c8d; font-weight: bold; margin-bottom: 15px; transition: color 0.2s; }
-        .btn-back:hover { color: #2c3e50; }
-        .post-header { display: flex; align-items: center; gap: 20px; margin: 20px 0; justify-content: space-between; }
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        .post-title-display { font-size: 2rem; font-weight: bold; color: #2c3e50; margin: 0; }
-        .btn-edit-trigger { background: #2980b9; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
-        .main-content { display: flex; gap: 25px; margin-bottom: 25px; align-items: flex-start; }
-        .slider-column { flex: 1.5; min-width: 300px; position: relative; }
-        .info-column { flex: 1; min-width: 250px; }
-        .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .slider-outer { position: relative; padding: 0 45px; }
-        .slider-viewport { width: 100%; height: 450px; background: #eee; border-radius: 8px; overflow: hidden; }
-        .slide-track { display: flex; transition: transform 0.4s ease-in-out; height: 100%; }
-        .slide-track img { min-width: 100%; height: 100%; object-fit: contain; }
-        .slide-btn { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 40px; color: #2c3e50; cursor: pointer; z-index: 10; }
-        .prev { left: 0px; } .next { right: 0px; }
-        .used-item-list { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
-        .used-item-list h4 { margin: 0 0 10px 0; font-size: 1rem; color: #333; }
-        .used-item-list ul { padding-left: 20px; margin: 0; }
-        .used-item-list li { margin-bottom: 5px; }
-        .edit-form-box { display: none; background: white; padding: 30px; border: 2px solid #2c3e50; border-radius: 8px; margin-bottom: 30px; }
-        .edit-form-box label { display: block; margin-top: 15px; font-weight: bold; }
-        .edit-form-box input, .edit-form-box textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .drop-zone { width: 100%; height: 70px; border: 2px dashed #2980b9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #2980b9; cursor: pointer; background: #f9fbff; }
-        .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-        .thumb-wrapper { position: relative; width: 60px; height: 60px; }
-        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
-        .del-btn { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; }
-        .used-item-row { display: flex; gap: 5px; margin-bottom: 5px; }
-        .used-item-row input:nth-child(1) { flex: 1; }
-        .used-item-row input:nth-child(2) { flex: 2; }
-        .btn-delete { background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
+<style>
+    /* --- 全体・背景設定 --- */
+    body { font-family: sans-serif; margin: 0; padding: 0; background-color: #0b0e1a; color: #e0e6ed; min-height: 100vh; overflow-y: auto; }
+    .bg-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 125vh; z-index: -1; background-image: url('bg-pattern.jpg'); background-size: cover; pointer-events: none; }
+    
+    .navbar { background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); padding: 15px 0; text-align: center; border-bottom: 1px solid rgba(0, 242, 255, 0.2); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #00f2ff; text-decoration: none; font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
 
-        /* --- 新規追加：コメント用スタイル --- */
-        .comment-area { border-top: 2px solid #eee; padding-top: 20px; margin-top: 10px; }
-        .comment-placeholder { background: #f9f9f9; border: 1px dashed #ccc; padding: 20px; text-align: center; color: #999; border-radius: 4px; }
-    </style>
+    .container { max-width: 1000px; margin: auto; padding: 0 20px 40px 20px; box-sizing: border-box; }
+    
+    /* 戻るボタン */
+    .btn-back { display: inline-block; text-decoration: none; color: #00f2ff; font-weight: bold; margin: 20px 0; transition: 0.3s; opacity: 0.8; }
+    .btn-back:hover { opacity: 1; text-shadow: 0 0 10px #00f2ff; }
+
+    /* ヘッダーエリア */
+    .post-header { display: flex; align-items: center; gap: 20px; margin: 20px 0; justify-content: space-between; }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .post-title-display { font-size: 2rem; font-weight: bold; color: #fff; margin: 0; text-shadow: 0 0 12px rgba(0, 242, 255, 0.8); }
+
+    /* 編集トリガーボタン */
+    .btn-edit-trigger { 
+        background: linear-gradient(135deg, #00d2ff, #3a7bd5); 
+        color: white; border: none; padding: 10px 20px; 
+        border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;
+        transition: 0.3s; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+    .btn-edit-trigger:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+    /* メインレイアウト */
+    .main-content { display: flex; gap: 25px; margin-bottom: 25px; align-items: flex-start; }
+    .slider-column { flex: 1.5; min-width: 300px; position: relative; }
+    .info-column { flex: 1; min-width: 250px; }
+
+    /* セクション（カード状のデザイン） */
+    .section { 
+        background: rgba(15, 23, 42, 0.7); padding: 25px; border-radius: 8px; 
+        border: 1px solid rgba(0, 242, 255, 0.2); backdrop-filter: blur(10px); margin-bottom: 20px; 
+    }
+    h3 { color: #00f2ff; margin-top: 0; border-left: 4px solid #00f2ff; padding-left: 10px; font-size: 1.2rem; }
+
+    /* スライダー */
+    .slider-outer { position: relative; padding: 0 45px; }
+    .slider-viewport { width: 100%; height: 450px; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+    .slide-track { display: flex; transition: transform 0.4s ease-in-out; height: 100%; }
+    .slide-track img { min-width: 100%; height: 100%; object-fit: contain; }
+    .slide-btn { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 40px; color: #00f2ff; cursor: pointer; z-index: 10; text-shadow: 0 0 10px #00f2ff; transition: 0.2s; }
+    .slide-btn:hover { scale: 1.2; }
+    .prev { left: 0px; } .next { right: 0px; }
+
+    /* リストデザイン（下線なし・ホバーで光る設定に統一） */
+    .used-item-list { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .used-item-list ul, #display-ref-list { padding-left: 20px; margin: 0; }
+    .used-item-list li, #display-ref-list li { margin-bottom: 8px; }
+    
+    /* aタグのデザインを「使用したもの」と「参考投稿」で共通化 */
+    .used-item-list a, 
+    #display-ref-list a { 
+        color: #fff; 
+        text-decoration: none; 
+        transition: 0.3s; 
+        word-break: break-all; /* 長いURLの折り返し対策 */
+    }
+    .used-item-list a:hover, 
+    #display-ref-list a:hover { 
+        color: #00f2ff; 
+        text-shadow: 0 0 8px rgba(0, 242, 255, 0.6); 
+    }
+
+    /* 新規投稿ボタン (FAB) */
+    .fab-post {
+        position: fixed; bottom: 30px; right: 30px;
+        width: 180px; height: 55px; border-radius: 50px;
+        background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        color: white; text-decoration: none;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
+        z-index: 1000; transition: 0.3s; border: none; cursor: pointer;
+    }
+    .fab-post:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 8px 25px rgba(0, 210, 255, 0.6); filter: brightness(1.1); }
+
+    /* 編集フォーム */
+    .edit-form-box { 
+        display: none; background: rgba(10, 15, 30, 0.95); padding: 30px; 
+        border: 2px solid #00f2ff; border-radius: 8px; margin-bottom: 30px; 
+        box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+    }
+    .edit-form-box label { display: block; margin-top: 15px; font-weight: bold; color: #00f2ff; font-size: 0.9rem; }
+    .edit-form-box input, .edit-form-box textarea { 
+        width: 100%; padding: 12px; margin-top: 5px; background: rgba(255,255,255,0.05); 
+        border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; color: #fff; box-sizing: border-box; 
+    }
+    .edit-form-box input:focus { border-color: #00f2ff; outline: none; background: rgba(255,255,255,0.1); }
+
+    .drop-zone { width: 100%; height: 70px; border: 2px dashed #00f2ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #00f2ff; cursor: pointer; background: rgba(0, 242, 255, 0.05); margin-top: 10px; }
+    .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+    .thumb-wrapper { position: relative; width: 60px; height: 60px; border: 1px solid #00f2ff; }
+    .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .del-btn { position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; }
+    .used-item-row { display: flex; gap: 5px; margin-bottom: 10px; }
+    .btn-delete { background: #ff4d4d; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
+
+    .comment-area { border-top: 1px solid rgba(0, 242, 255, 0.2); padding-top: 20px; }
+    .comment-placeholder { background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.2); padding: 20px; text-align: center; color: #718096; border-radius: 4px; }
+    
+    @media (max-width: 768px) {
+        .post-header { flex-direction: column-reverse; align-items: flex-start; gap: 15px; }
+        .post-title-display { font-size: 1.5rem; }
+        .main-content { flex-direction: column; }
+        .slider-column, .info-column { width: 100%; min-width: 100%; }
+        .slider-viewport { height: 300px; }
+        .slider-outer { padding: 0 35px; }
+        .used-item-row { flex-direction: column; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 4px; }
+        .fab-post { width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; bottom: 20px; right: 20px; }
+        .fab-text { display: none; }
+    }
+</style>
 </head>
 <body>
 
+<div class="bg-fixed"></div>
 <nav class="navbar"><a href="index.html" class="nav-logo">VRC改変アーカイブ</a></nav>
 
 <div class="container">
-    <a href="list.html" class="btn-back">← 投稿一覧</a>
+    <a href="list.html" class="btn-back">← 投稿一覧に戻る</a>
 
     <div class="post-header">
         <div class="header-left">
@@ -62,24 +138,24 @@
     </div>
 
     <div id="edit-form" class="edit-form-box">
-        <h3>投稿内容の編集</h3>
+        <h3 style="border:none; padding:0;">CONTENT EDITING</h3>
         <label>タイトル</label><input type="text" id="input-title">
         <label>アバター名</label><input type="text" id="input-avatar">
         <label>使用したもの</label>
         <div id="used-items-edit-list"></div>
-        <button onclick="addUsedItemInput()" style="background: #29b929; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px;">＋ 追加</button>
-        <label>メイン画像（ドロップで追加）</label>
+        <button onclick="addUsedItemInput()" style="background: #00d28d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-weight: bold;">＋ 追加</button>
+        <label>メイン画像</label>
         <div id="preview-main-edit" class="preview-container"></div>
-        <div id="drop-main-edit" class="drop-zone">画像をドロップ</div>
-        <label>解説画像（ドロップで追加）</label>
+        <div id="drop-main-edit" class="drop-zone">IMAGES DROP HERE</div>
+        <label>解説画像</label>
         <div id="preview-sub-edit" class="preview-container"></div>
-        <div id="drop-sub-edit" class="drop-zone">画像をドロップ</div>
+        <div id="drop-sub-edit" class="drop-zone">IMAGES DROP HERE</div>
         <label>解説テキスト</label><textarea id="input-method" rows="5"></textarea>
         <label>参考投稿（URL）</label>
         <div id="url-list-edit"></div>
-        <button onclick="addUrlInputEdit()" style="background: #29b929; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px;">＋ 追加</button>
-        <button onclick="updatePost()" style="background:#2980b9; color:white; padding:15px; width:100%; border:none; border-radius:4px; margin-top:30px; font-weight:bold; cursor:pointer;">変更をすべて保存</button>
-        <button onclick="deletePost()" style="background:#e74c3c; color:white; padding:10px; width:100%; border:none; border-radius:4px; margin-top:15px; font-weight:bold; cursor:pointer;">この投稿を削除する</button>
+        <button onclick="addUrlInputEdit()" style="background: #00d28d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; font-weight: bold;">＋ 追加</button>
+        <button onclick="updatePost()" style="background:#00d2ff; color:white; padding:15px; width:100%; border:none; border-radius:4px; margin-top:30px; font-weight:bold; cursor:pointer;">変更をすべて保存</button>
+        <button onclick="deletePost()" style="background:#ff4d4d; color:white; padding:10px; width:100%; border:none; border-radius:4px; margin-top:15px; font-weight:bold; cursor:pointer; opacity:0.8;">この投稿を削除する</button>
     </div>
 
     <div class="main-content">
@@ -94,7 +170,7 @@
         </div>
         <div class="info-column">
             <div class="section">
-                <h3>アバター: <strong id="display-avatar"></strong></h3>
+                <h3>アバター: <strong id="display-avatar" style="color: #fff;"></strong></h3>
                 <div id="used-items-display-box" class="used-item-list">
                     <h4>使用したもの</h4>
                     <ul id="display-used-list"></ul>
@@ -105,8 +181,8 @@
 
     <div class="section">
         <h3>改変の手順・メモ</h3>
-        <p id="display-method" style="white-space: pre-wrap; line-height: 1.6;"></p>
-        <div id="sub-slider-area" class="slider-outer" style="display: none; margin-top: 20px;">
+        <p id="display-method" style="white-space: pre-wrap; line-height: 1.8; color: #cbd5e0;"></p>
+        <div id="sub-slider-area" class="slider-outer" style="display: none; margin-top: 30px;">
             <button class="slide-btn prev" onclick="moveSlide('sub', -1)">❮</button>
             <div class="slider-viewport" style="height: 350px;"><div class="slide-track" id="sub-track"></div></div>
             <button class="slide-btn next" onclick="moveSlide('sub', 1)">❯</button>
@@ -120,11 +196,14 @@
 
     <div class="section comment-area">
         <h3>コメント</h3>
-        <div class="comment-placeholder">
-            コメント機能は準備中です
-        </div>
+        <div class="comment-placeholder">SYSTEM: COMMENT MODULE UNDER CONSTRUCTION...</div>
     </div>
 </div>
+
+<a href="index.html" class="fab-post">
+    <span style="margin-right:8px; font-size:1.4rem;">＋</span>
+    <span class="fab-text">新規投稿</span>
+</a>
 
 <script>
     /* JavaScript部分は変更なし */
@@ -137,23 +216,12 @@
         const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
         postId = urlId ? parseInt(urlId) : null;
-
-        fetch('/api/posts')
-            .then(res => res.json())
-            .then(data => {
-                allPosts = data;
-                currentPost = allPosts.find(p => p.id == postId);
-                if (!currentPost) {
-                    alert("投稿が見つかりませんでした。");
-                    window.location.href = "list.html";
-                    return;
-                }
-                renderAll();
-            })
-            .catch(err => {
-                console.error("通信エラー:", err);
-                alert("データの読み込みに失敗しました。");
-            });
+        fetch('/api/posts').then(res => res.json()).then(data => {
+            allPosts = data;
+            currentPost = allPosts.find(p => p.id == postId);
+            if (!currentPost) { alert("投稿が見つかりませんでした。"); window.location.href = "list.html"; return; }
+            renderAll();
+        }).catch(err => console.error("通信エラー:", err));
     };
 
     function renderAll() {
@@ -161,7 +229,6 @@
         document.getElementById('display-avatar').innerText = currentPost.avatarName || "未設定";
         document.getElementById('display-method').innerText = currentPost.methodText || "";
         document.getElementById('main-track').innerHTML = (currentPost.mainImgs || []).map(src => `<img src="${src}">`).join('');
-        
         const usedList = document.getElementById('display-used-list');
         usedList.innerHTML = "";
         if (currentPost.usedItems && currentPost.usedItems.length > 0) {
@@ -169,18 +236,12 @@
             currentPost.usedItems.forEach(item => {
                 usedList.innerHTML += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`;
             });
-        } else {
-            document.getElementById('used-items-display-box').style.display = "none";
-        }
-
+        } else { document.getElementById('used-items-display-box').style.display = "none"; }
         const subTrack = document.getElementById('sub-track');
         if (currentPost.subImgs && currentPost.subImgs.length > 0) {
             document.getElementById('sub-slider-area').style.display = "block";
             subTrack.innerHTML = currentPost.subImgs.map(src => `<img src="${src}">`).join('');
-        } else {
-            document.getElementById('sub-slider-area').style.display = "none";
-        }
-
+        } else { document.getElementById('sub-slider-area').style.display = "none"; }
         const refList = document.getElementById('display-ref-list');
         refList.innerHTML = "";
         if (currentPost.refUrls && currentPost.refUrls.length > 0) {
@@ -188,96 +249,7 @@
             currentPost.refUrls.forEach(url => {
                 refList.innerHTML += `<li><a href="${url}" target="_blank">${url}</a></li>`;
             });
-        } else {
-            document.getElementById('ref-box').style.display = "none";
-        }
-    }
-
-    function handleFilesEdit(files, key) {
-        [...files].forEach(file => {
-            const formData = new FormData();
-            formData.append('image', file);
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.url) {
-                    currentPost[key + 'Imgs'].push(data.url);
-                    renderEditPreviews(key);
-                }
-            })
-            .catch(err => console.error("Upload Error:", err));
-        });
-    }
-
-    ['main', 'sub'].forEach(key => {
-        const zone = document.getElementById(`drop-${key}-edit`);
-        if(zone) {
-            zone.ondragover = e => e.preventDefault();
-            zone.ondrop = e => { e.preventDefault(); handleFilesEdit(e.dataTransfer.files, key); };
-        }
-    });
-
-    function renderEditPreviews(key) {
-        document.getElementById(`preview-${key}-edit`).innerHTML = (currentPost[key + 'Imgs'] || []).map((src, i) => `
-            <div class="thumb-wrapper"><img src="${src}"><button class="del-btn" onclick="removeImgEdit('${key}', ${i})">×</button></div>
-        `).join('');
-    }
-
-    function removeImgEdit(key, i) { currentPost[key + 'Imgs'].splice(i, 1); renderEditPreviews(key); }
-
-    function updatePost() {
-        currentPost.title = document.getElementById('input-title').value;
-        currentPost.avatarName = document.getElementById('input-avatar').value;
-        currentPost.methodText = document.getElementById('input-method').value;
-        const names = document.querySelectorAll('.used-item-name');
-        const urls = document.querySelectorAll('.used-item-url');
-        currentPost.usedItems = [];
-        names.forEach((n, i) => { if(n.value.trim()) currentPost.usedItems.push({ name: n.value, url: urls[i].value }); });
-        currentPost.refUrls = Array.from(document.querySelectorAll('.url-input-edit')).map(i => i.value).filter(v => v.trim());
-
-        const index = allPosts.findIndex(p => p.id == postId);
-        allPosts[index] = currentPost;
-
-        fetch('/api/posts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(allPosts)
-        })
-        .then(res => res.json())
-        .then(result => {
-            if(result.status === "success") {
-                alert("変更を保存しました");
-                renderAll();
-                toggleEdit();
-            }
-        });
-    }
-
-    function deletePost() {
-        if (!confirm("この投稿を完全に削除してもよろしいですか？\n復元はできません。")) return;
-        const newPosts = allPosts.filter(p => p.id != postId);
-        fetch('/api/posts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newPosts)
-        })
-        .then(res => res.json())
-        .then(result => {
-            if(result.status === "success") {
-                alert("削除しました");
-                window.location.href = "list.html";
-            }
-        });
-    }
-
-    function moveSlide(key, dir) {
-        const imgs = (key === 'main') ? currentPost.mainImgs : currentPost.subImgs;
-        if (!imgs || imgs.length <= 1) return;
-        currentPos[key] = (currentPos[key] + dir + imgs.length) % imgs.length;
-        document.getElementById(key + '-track').style.transform = `translateX(-${currentPos[key] * 100}%)`;
+        } else { document.getElementById('ref-box').style.display = "none"; }
     }
 
     function toggleEdit() {
@@ -296,19 +268,50 @@
         }
     }
 
+    function renderEditPreviews(key) {
+        document.getElementById(`preview-${key}-edit`).innerHTML = (currentPost[key + 'Imgs'] || []).map((src, i) => `
+            <div class="thumb-wrapper"><img src="${src}"><button class="del-btn" onclick="removeImgEdit('${key}', ${i})">×</button></div>
+        `).join('');
+    }
+    function removeImgEdit(key, i) { currentPost[key + 'Imgs'].splice(i, 1); renderEditPreviews(key); }
     function addUsedItemInput(name = "", url = "") {
         const div = document.createElement('div');
         div.className = 'used-item-row';
         div.innerHTML = `<input type="text" class="used-item-name" placeholder="アイテム名" value="${name}"><input type="url" class="used-item-url" placeholder="URL" value="${url}"><button class="btn-delete" onclick="this.parentElement.remove()">ー</button>`;
         document.getElementById('used-items-edit-list').appendChild(div);
     }
-
     function addUrlInputEdit(val = "") {
         const div = document.createElement('div');
         div.style.display = "flex"; div.style.gap = "5px"; div.style.marginBottom = "5px";
         div.innerHTML = `<input type="url" class="url-input-edit" value="${val}" style="flex:1"><button class="btn-delete" onclick="this.parentElement.remove()">ー</button>`;
         document.getElementById('url-list-edit').appendChild(div);
     }
+    function moveSlide(key, dir) {
+        const imgs = (key === 'main') ? currentPost.mainImgs : currentPost.subImgs;
+        if (!imgs || imgs.length <= 1) return;
+        currentPos[key] = (currentPos[key] + dir + imgs.length) % imgs.length;
+        document.getElementById(key + '-track').style.transform = `translateX(-${currentPos[key] * 100}%)`;
+    }
+    function updatePost() {
+        currentPost.title = document.getElementById('input-title').value;
+        currentPost.avatarName = document.getElementById('input-avatar').value;
+        currentPost.methodText = document.getElementById('input-method').value;
+        const names = document.querySelectorAll('.used-item-name');
+        const urls = document.querySelectorAll('.used-item-url');
+        currentPost.usedItems = [];
+        names.forEach((n, i) => { if(n.value.trim()) currentPost.usedItems.push({ name: n.value, url: urls[i].value }); });
+        currentPost.refUrls = Array.from(document.querySelectorAll('.url-input-edit')).map(i => i.value).filter(v => v.trim());
+        const index = allPosts.findIndex(p => p.id == postId);
+        allPosts[index] = currentPost;
+        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) })
+        .then(res => res.json()).then(result => { if(result.status === "success") { alert("変更を保存しました"); renderAll(); toggleEdit(); } });
+    }
+    function deletePost() {
+        if (!confirm("削除しますか？")) return;
+        const newPosts = allPosts.filter(p => p.id != postId);
+        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPosts) }).then(() => { window.location.href = "list.html"; });
+    }
 </script>
+
 </body>
 </html>
