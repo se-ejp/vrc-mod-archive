@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>VRC改変アーカイブ - 投稿ギャラリー</title>
+<style>
+    /* 全体設定 */
+    body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f4f7f6;
+        color: #333;
+    }
+
+    /* ナビゲーションバー */
+    .navbar {
+        background: #2c3e50;
+        padding: 15px 0;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .nav-logo {
+        color: white;
+        text-decoration: none;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    /* メインコンテンツの外枠 */
+    .container {
+        max-width: 1100px;
+        margin: auto;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    /* ページの見出しエリア */
+    .page-header {
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+    }
+
+    /* 投稿カードの並び（グリッド） */
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    /* 投稿カード単体 */
+    .post-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.3s;
+    }
+
+    .post-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* カード内の画像 */
+    .card-img {
+        width: 100%;
+        height: 200px;
+        background: #eee;
+        object-fit: cover;
+    }
+
+    /* カード内のテキストエリア */
+    .card-content {
+        padding: 15px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin: 0 0 8px 0;
+        color: #2c3e50;
+    }
+
+    .card-avatar {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+    }
+
+    /* 右下の固定投稿ボタン (FAB) */
+    .fab-button {
+        position: fixed;
+        right: 30px;
+        bottom: 30px;
+        z-index: 1000;
+
+        background-color: #2980b9;
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+
+        padding: 15px 25px;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .fab-button:hover {
+        background-color: #3498db;
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+<nav class="navbar"><a href="index.html" class="nav-logo">VRC改変アーカイブ</a></nav>
+<div class="container">
+    <div class="page-header">
+        <h2>投稿ギャラリー</h2>
+    </div>
+    <div class="post-grid" id="post-list"></div>
+</div>
+
+<a href="create.html" class="fab-button">＋ 新規投稿</a>
+
+<script>
+    window.onload = () => {
+        const container = document.getElementById('post-list');
+        const allPosts = JSON.parse(localStorage.getItem('vrc_posts_list') || "[]");
+        [...allPosts].reverse().forEach(post => {
+            const thumb = (post.mainImgs && post.mainImgs.length > 0) ? post.mainImgs[0] : "";
+            const card = document.createElement('a');
+            card.href = `post.html`;
+            card.className = 'post-card';
+            card.innerHTML = `<img src="${thumb}" class="card-img"><div class="card-content"><h3 class="card-title">${post.title || "無題"}</h3><div class="card-avatar">👤 ${post.avatarName || "未設定"}</div></div>`;
+            card.onclick = () => localStorage.setItem('vrc_post_data', JSON.stringify(post));
+            container.appendChild(card);
+        });
+    };
+</script>
+</body>
+</html>
