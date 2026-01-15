@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>VRC改変アーカイブ - 投稿一覧</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f7f6;
+            color: #333;
+        }
+        .navbar {
+            background: #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-logo {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 0 20px 40px 20px;
+        }
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .btn-create {
+            background: #2980b9;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .post-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .post-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .card-img {
+            width: 100%;
+            height: 180px;
+            background: #eee;
+            object-fit: cover;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .card-title {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: bold;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-avatar {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .card-date {
+            font-size: 0.8rem;
+            color: #999;
+            text-align: right;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar"><a href="index.html" class="nav-logo">VRC改変アーカイブ</a></nav>
+
+<div class="container">
+    <div class="header-area">
+        <h2>改変アーカイブ一覧</h2>
+        <a href="create.html" class="btn-create">＋ 新規作成</a>
+    </div>
+
+    <div id="post-list" class="post-grid">
+        </div>
+</div>
+
+<script>
+    window.onload = () => {
+        const postListArea = document.getElementById('post-list');
+
+        fetch('/api/posts')
+            .then(res => res.json())
+            .then(allPosts => {
+                postListArea.innerHTML = "";
+
+                if (!allPosts || allPosts.length === 0) {
+                    postListArea.innerHTML = `<div class="empty-message"><p>まだ投稿がありません。</p></div>`;
+                    return;
+                }
+
+                // IDが大きい順（新しい順）に並べ替え
+                allPosts.sort((a, b) => b.id - a.id).forEach(post => {
+                    const card = document.createElement('a');
+                    card.className = 'post-card';
+                    card.href = `post.html?id=${post.id}`;
+
+                    const thumb = (post.mainImgs && post.mainImgs.length > 0) 
+                                  ? post.mainImgs[0] 
+                                  : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23eee"/></svg>';
+
+                    // 日付の変換でエラーが起きないように工夫
+                    let dateStr = "不明";
+                    try {
+                        dateStr = new Date(post.id).toLocaleDateString();
+                    } catch(e) { console.error(e); }
+
+                    card.innerHTML = `
+                        <img src="${thumb}" class="card-img" alt="thumbnail">
+                        <div class="card-body">
+                            <div class="card-title">${post.title || '無題'}</div>
+                            <div class="card-avatar">アバター: ${post.avatarName || '未設定'}</div>
+                            <div class="card-date">${dateStr}</div>
+                        </div>
+                    `;
+                    postListArea.appendChild(card);
+                });
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                postListArea.innerHTML = "<p>読み込み失敗</p>";
+            });
+    };
+</script>
+
+</body>
+</html>

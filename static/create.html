@@ -4,32 +4,23 @@
     <meta charset="UTF-8">
     <title>VRC改変アーカイブ - 新規作成</title>
     <style>
-        /* 基本スタイル（post.htmlと統一） */
+        /* スタイルは一切変更なしなのでそのまま維持してください */
         body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f7f6; color: #333; }
         .navbar { background: #2c3e50; padding: 15px 0; text-align: center; margin-bottom: 20px; }
         .nav-logo { color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold; }
         .container { max-width: 800px; margin: auto; padding: 0 20px 40px 20px; }
-        
         .section-title { color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px; margin-top: 30px; }
-        
-        /* 入力フォームのスタイル */
         .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         label { display: block; margin-top: 15px; font-weight: bold; color: #333; }
         input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        
-        /* 画像ドロップゾーン */
         .drop-zone { width: 100%; height: 70px; border: 2px dashed #2980b9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #2980b9; cursor: pointer; background: #f9fbff; margin-top: 10px; }
         .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
         .thumb-wrapper { position: relative; width: 80px; height: 80px; }
         .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
         .del-btn { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; }
-        
-        /* 使用したもの・URL入力行 */
         .used-item-row { display: flex; gap: 5px; margin-bottom: 5px; }
         .used-item-row input:nth-child(1) { flex: 1; }
         .used-item-row input:nth-child(2) { flex: 2; }
-        
-        /* ボタン色設定（post.htmlと完全統一） */
         .btn-add { background: #29b929; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
         .btn-delete { background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
         .btn-save { background: #2980b9; color: white; padding: 15px; width: 100%; border: none; border-radius: 4px; margin-top: 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
@@ -46,48 +37,34 @@
     <div class="form-box">
         <label>タイトル</label>
         <input type="text" id="input-title" placeholder="例：黒を基調としたパーティードレス改変">
-        
         <label>アバター名</label>
         <input type="text" id="input-avatar" placeholder="使用したアバターの名前">
-        
         <label>使用したもの（名前とURL）</label>
         <div id="used-items-list"></div>
         <button onclick="addUsedItemInput()" class="btn-add">＋ アイテムを追加</button>
-
         <label>メイン画像</label>
         <div id="preview-main" class="preview-container"></div>
         <div id="drop-main" class="drop-zone" onclick="document.getElementById('file-main').click()">画像をドロップまたはクリック</div>
         <input type="file" id="file-main" multiple style="display:none" onchange="handleFiles(this.files, 'main')">
-        
         <label>解説画像（手順の説明など）</label>
         <div id="preview-sub" class="preview-container"></div>
         <div id="drop-sub" class="drop-zone" onclick="document.getElementById('file-sub').click()">画像をドロップまたはクリック</div>
         <input type="file" id="file-sub" multiple style="display:none" onchange="handleFiles(this.files, 'sub')">
-        
         <label>解説テキスト</label>
         <textarea id="input-method" rows="8" placeholder="改変のコツや手順、質問をメモしてください"></textarea>
-        
         <label>参考投稿（URL）</label>
         <div id="url-list"></div>
         <button onclick="addUrlInput()" class="btn-add">＋ URLを追加</button>
-        
         <button onclick="savePost()" class="btn-save">投稿を保存する</button>
     </div>
 </div>
 
 <script>
-    // データ構造
-    let postData = {
-        title: "",
-        avatarName: "",
-        usedItems: [],
-        mainImgs: [],
-        subImgs: [],
-        methodText: "",
-        refUrls: []
-    };
+    let postData = { title: "", avatarName: "", usedItems: [], mainImgs: [], subImgs: [], methodText: "", refUrls: [] };
 
-    // アイテム入力行の追加（post.htmlと同じ仕様）
+    let mainImgs = postData.mainImgs; 
+    let subImgs = postData.subImgs;
+    
     function addUsedItemInput(name = "", url = "") {
         const div = document.createElement('div');
         div.className = 'used-item-row';
@@ -99,7 +76,6 @@
         document.getElementById('used-items-list').appendChild(div);
     }
 
-    // URL入力行の追加（post.htmlと同じ仕様）
     function addUrlInput(val = "") {
         const div = document.createElement('div');
         div.style.display = "flex"; div.style.gap = "5px"; div.style.marginBottom = "5px";
@@ -110,28 +86,35 @@
         document.getElementById('url-list').appendChild(div);
     }
 
-    // 画像処理（ドラッグ＆ドロップ対応）
     function handleFiles(files, key) {
+        const maxWidth = 800;
         [...files].forEach(file => {
             const reader = new FileReader();
             reader.onload = e => {
-                postData[key + 'Imgs'].push(e.target.result);
-                renderPreviews(key);
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    postData[key + 'Imgs'].push(compressedDataUrl);
+                    renderPreviews(key);
+                };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         });
     }
 
-    // ドロップゾーンの設定
     ['main', 'sub'].forEach(key => {
         const zone = document.getElementById(`drop-${key}`);
         zone.ondragover = e => { e.preventDefault(); zone.style.background = "#eef7ff"; };
         zone.ondragleave = () => { zone.style.background = "#f9fbff"; };
-        zone.ondrop = e => {
-            e.preventDefault();
-            zone.style.background = "#f9fbff";
-            handleFiles(e.dataTransfer.files, key);
-        };
+        zone.ondrop = e => { e.preventDefault(); zone.style.background = "#f9fbff"; handleFiles(e.dataTransfer.files, key); };
     });
 
     function renderPreviews(key) {
@@ -143,46 +126,58 @@
         `).join('');
     }
 
-    function removeImg(key, i) {
-        postData[key + 'Imgs'].splice(i, 1);
-        renderPreviews(key);
-    }
+    function removeImg(key, i) { postData[key + 'Imgs'].splice(i, 1); renderPreviews(key); }
 
-    // 保存処理
+    // ★重要：サーバー保存への書き換え
     function savePost() {
-        postData.title = document.getElementById('input-title').value;
-        postData.avatarName = document.getElementById('input-avatar').value;
-        postData.methodText = document.getElementById('input-method').value;
+        const title = document.getElementById('input-title').value;
+        if(!title) { alert("タイトルを入力してください"); return; }
 
-        // アイテムリスト取得
-        const names = document.querySelectorAll('.used-item-name');
-        const urls = document.querySelectorAll('.used-item-url');
-        postData.usedItems = [];
-        names.forEach((n, i) => {
-            if(n.value.trim()) postData.usedItems.push({ name: n.value, url: urls[i].value });
-        });
+        const newPost = {
+            id: Date.now(),
+            title: title,
+            avatarName: document.getElementById('input-avatar').value,
+            usedItems: Array.from(document.querySelectorAll('.used-item-row')).map(row => ({
+                name: row.querySelector('.used-item-name').value,
+                url: row.querySelector('.used-item-url').value
+            })),
+            methodText: document.getElementById('input-method').value,
+            // ★ここを修正しました（postData. を付けました）
+            mainImgs: postData.mainImgs, 
+            subImgs: postData.subImgs,
+            refUrls: Array.from(document.querySelectorAll('.url-input')).map(i => i.value).filter(v => v.trim())
+        };
 
-        // 参考URL取得
-        postData.refUrls = Array.from(document.querySelectorAll('.url-input'))
-                                .map(i => i.value)
-                                .filter(v => v.trim());
-
-        if(!postData.title) {
-            alert("タイトルを入力してください");
-            return;
-        }
-
-        localStorage.setItem('vrc_post_data', JSON.stringify(postData));
-        alert("新規投稿を保存しました！");
-        window.location.href = "post.html"; // 保存後に詳細画面へ移動
+        // サーバーから今のデータを全部取ってきて、新しいのを追加して送り返す
+        fetch('/api/posts')
+            .then(res => {
+                if (!res.ok) throw new Error("サーバーとの通信に失敗しました");
+                return res.json();
+            })
+            .then(allPosts => {
+                allPosts.push(newPost);
+                return fetch('/api/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(allPosts)
+                });
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.status === "success") {
+                    alert("サーバーに保存しました！");
+                    window.location.href = "list.html";
+                } else {
+                    alert("保存エラー: " + result.message);
+                }
+            })
+            .catch(err => {
+                console.error("通信エラー:", err);
+                alert("保存に失敗しました。Dockerが動いているか、posts.jsonが存在するか確認してください。");
+            });
     }
 
-    // 初期状態で1行ずつ入力欄を出しておく
-    window.onload = () => {
-        addUsedItemInput();
-        addUrlInput();
-    };
+    window.onload = () => { addUsedItemInput(); addUrlInput(); };
 </script>
-
 </body>
 </html>
