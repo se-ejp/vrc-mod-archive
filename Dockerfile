@@ -1,15 +1,18 @@
-# Pythonの入った箱をベースにする
+# 軽量版のPythonイメージを使用
 FROM python:3.9-slim
 
-# 作業するフォルダを決める
+# 作業ディレクトリを作成
 WORKDIR /app
 
-# 必要なプログラムをコピー
-COPY app.py .
-COPY static/ ./static/
-
-# 必要なライブラリをインストール
+# --- [ここが爆速のポイント] ---
+# 先にライブラリのインストールだけを済ませる
+# これにより、app.pyを書き換えてもpip installは実行されず、キャッシュが使われます
 RUN pip install flask
+
+# その後にプログラム全体をコピー
+# docker-compose.ymlでボリューム設定をしているなら、
+# ビルド時にも最新の状態をコピーしておくと確実です
+COPY . .
 
 # 5000番ポートを使う
 EXPOSE 5000

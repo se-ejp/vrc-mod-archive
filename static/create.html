@@ -62,9 +62,6 @@
 <script>
     let postData = { title: "", avatarName: "", usedItems: [], mainImgs: [], subImgs: [], methodText: "", refUrls: [] };
 
-    let mainImgs = postData.mainImgs; 
-    let subImgs = postData.subImgs;
-    
     function addUsedItemInput(name = "", url = "") {
         const div = document.createElement('div');
         div.className = 'used-item-row';
@@ -86,35 +83,39 @@
         document.getElementById('url-list').appendChild(div);
     }
 
+    // ★ フォルダ保存対応版：画像を選んだらすぐにサーバーへアップロードする
     function handleFiles(files, key) {
-        const maxWidth = 800;
         [...files].forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    postData[key + 'Imgs'].push(compressedDataUrl);
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // サーバー（app.pyの/api/upload）に送信
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.url) {
+                    // サーバーから返ってきたURL（/static/uploads/◯◯.jpg）を保存
+                    postData[key + 'Imgs'].push(data.url);
                     renderPreviews(key);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                }
+            })
+            .catch(err => {
+                console.error("アップロード失敗:", err);
+                alert("画像のアップロードに失敗しました。");
+            });
         });
     }
 
     ['main', 'sub'].forEach(key => {
         const zone = document.getElementById(`drop-${key}`);
-        zone.ondragover = e => { e.preventDefault(); zone.style.background = "#eef7ff"; };
-        zone.ondragleave = () => { zone.style.background = "#f9fbff"; };
-        zone.ondrop = e => { e.preventDefault(); zone.style.background = "#f9fbff"; handleFiles(e.dataTransfer.files, key); };
+        if(zone) {
+            zone.ondragover = e => { e.preventDefault(); zone.style.background = "#eef7ff"; };
+            zone.ondragleave = () => { zone.style.background = "#f9fbff"; };
+            zone.ondrop = e => { e.preventDefault(); zone.style.background = "#f9fbff"; handleFiles(e.dataTransfer.files, key); };
+        }
     });
 
     function renderPreviews(key) {
@@ -128,7 +129,6 @@
 
     function removeImg(key, i) { postData[key + 'Imgs'].splice(i, 1); renderPreviews(key); }
 
-    // ★重要：サーバー保存への書き換え
     function savePost() {
         const title = document.getElementById('input-title').value;
         if(!title) { alert("タイトルを入力してください"); return; }
@@ -142,18 +142,13 @@
                 url: row.querySelector('.used-item-url').value
             })),
             methodText: document.getElementById('input-method').value,
-            // ★ここを修正しました（postData. を付けました）
             mainImgs: postData.mainImgs, 
             subImgs: postData.subImgs,
             refUrls: Array.from(document.querySelectorAll('.url-input')).map(i => i.value).filter(v => v.trim())
         };
 
-        // サーバーから今のデータを全部取ってきて、新しいのを追加して送り返す
         fetch('/api/posts')
-            .then(res => {
-                if (!res.ok) throw new Error("サーバーとの通信に失敗しました");
-                return res.json();
-            })
+            .then(res => res.json())
             .then(allPosts => {
                 allPosts.push(newPost);
                 return fetch('/api/posts', {
@@ -167,13 +162,11 @@
                 if(result.status === "success") {
                     alert("サーバーに保存しました！");
                     window.location.href = "list.html";
-                } else {
-                    alert("保存エラー: " + result.message);
                 }
             })
             .catch(err => {
                 console.error("通信エラー:", err);
-                alert("保存に失敗しました。Dockerが動いているか、posts.jsonが存在するか確認してください。");
+                alert("保存に失敗しました。");
             });
     }
 

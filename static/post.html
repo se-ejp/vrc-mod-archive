@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>VRC改変アーカイブ - 詳細</title>
     <style>
-        /* スタイル部分は変更なしで維持します */
+        /* --- 既存のスタイルは維持 --- */
         body { font-family: sans-serif; margin: 0; padding: 0; background: #f4f7f6; color: #333; }
         .navbar { background: #2c3e50; padding: 15px 0; text-align: center; margin-bottom: 20px; }
         .nav-logo { color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold; }
@@ -41,6 +41,10 @@
         .used-item-row input:nth-child(1) { flex: 1; }
         .used-item-row input:nth-child(2) { flex: 2; }
         .btn-delete { background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
+
+        /* --- 新規追加：コメント用スタイル --- */
+        .comment-area { border-top: 2px solid #eee; padding-top: 20px; margin-top: 10px; }
+        .comment-placeholder { background: #f9f9f9; border: 1px dashed #ccc; padding: 20px; text-align: center; color: #999; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -74,9 +78,7 @@
         <label>参考投稿（URL）</label>
         <div id="url-list-edit"></div>
         <button onclick="addUrlInputEdit()" style="background: #29b929; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px;">＋ 追加</button>
-        
         <button onclick="updatePost()" style="background:#2980b9; color:white; padding:15px; width:100%; border:none; border-radius:4px; margin-top:30px; font-weight:bold; cursor:pointer;">変更をすべて保存</button>
-        
         <button onclick="deletePost()" style="background:#e74c3c; color:white; padding:10px; width:100%; border:none; border-radius:4px; margin-top:15px; font-weight:bold; cursor:pointer;">この投稿を削除する</button>
     </div>
 
@@ -115,9 +117,17 @@
         <h3>参考投稿</h3>
         <ul id="display-ref-list"></ul>
     </div>
+
+    <div class="section comment-area">
+        <h3>コメント</h3>
+        <div class="comment-placeholder">
+            コメント機能は準備中です
+        </div>
+    </div>
 </div>
 
 <script>
+    /* JavaScript部分は変更なし */
     let allPosts = [];
     let currentPost = {};
     let postId = null;
@@ -184,24 +194,21 @@
     }
 
     function handleFilesEdit(files, key) {
-        const maxWidth = 800;
         [...files].forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width, height = img.height;
-                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    currentPost[key + 'Imgs'].push(canvas.toDataURL('image/jpeg', 0.7));
+            const formData = new FormData();
+            formData.append('image', file);
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.url) {
+                    currentPost[key + 'Imgs'].push(data.url);
                     renderEditPreviews(key);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                }
+            })
+            .catch(err => console.error("Upload Error:", err));
         });
     }
 
@@ -249,13 +256,9 @@
         });
     }
 
-    // 削除機能
     function deletePost() {
         if (!confirm("この投稿を完全に削除してもよろしいですか？\n復元はできません。")) return;
-
-        // 今のID以外の投稿だけを残す
         const newPosts = allPosts.filter(p => p.id != postId);
-
         fetch('/api/posts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

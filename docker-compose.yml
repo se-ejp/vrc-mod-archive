@@ -5,4 +5,8 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./posts.json:/app/posts.json  # これが重要！
+      # プログラムやHTMLを同期（保存したら即反映）
+      - .:/app
+      # posts.jsonを同期（手元でjsonをいじったりバックアップしたりしやすくなります）
+      - ./posts.json:/app/posts.json
+      - ./static/uploads:/app/static/uploads
