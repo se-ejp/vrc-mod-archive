@@ -1,29 +1,10 @@
 [
     {
-        "avatarName": "りゅうちゃんです",
-        "id": 1768464066452,
-        "mainImgs": [
-            "/static/uploads/2026-01-15/1768464064_スクリーンショット 2025-07-11 223621.png"
-        ],
-        "methodText": "va",
-        "refUrls": [
-            "va",
-            "cacaa"
-        ],
-        "subImgs": [],
-        "title": "りゅうちゃんです",
-        "usedItems": [
-            {
-                "name": "りゅうちゃん",
-                "url": "https://www.youtube.com/shorts/fPpsDgmuPi4"
-            }
-        ]
-    },
-    {
+        "authorId": "admin_master",
         "avatarName": "あ",
-        "id": 1768484178148,
+        "id": 1768536679229,
         "mainImgs": [
-            "/static/uploads/2026-01-15/1768484177_スクリーンショット 2025-07-11 224507.png"
+            "/static/uploads/2026-01-16/1768536677_スクリーンショット 2025-07-11 223621.png"
         ],
         "methodText": "",
         "refUrls": [],
@@ -31,25 +12,8 @@
         "title": "11時28っぷん",
         "usedItems": [
             {
-                "name": "",
-                "url": ""
-            }
-        ]
-    },
-    {
-        "avatarName": "ありがとう",
-        "id": 1768484198876,
-        "mainImgs": [
-            "/static/uploads/2026-01-15/1768484197_スクリーンショット 2025-07-25 112408.png"
-        ],
-        "methodText": "",
-        "refUrls": [],
-        "subImgs": [],
-        "title": "ありがとうあ",
-        "usedItems": [
-            {
-                "name": "んあ",
-                "url": "んお"
+                "name": "あ",
+                "url": "https://www.youtube.com/shorts/eToCweZpQek"
             }
         ]
     }

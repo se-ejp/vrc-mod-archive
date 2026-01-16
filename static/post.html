@@ -23,14 +23,25 @@
     .header-left { display: flex; align-items: center; gap: 20px; }
     .post-title-display { font-size: 2rem; font-weight: bold; color: #fff; margin: 0; text-shadow: 0 0 12px rgba(0, 242, 255, 0.8); }
 
-    /* 編集トリガーボタン */
+    /* 編集トリガーボタン（丸角・白文字・グラデーション） */
     .btn-edit-trigger { 
+        display: none; /* 権限がある時だけJSで表示 */
         background: linear-gradient(135deg, #00d2ff, #3a7bd5); 
-        color: white; border: none; padding: 10px 20px; 
-        border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;
-        transition: 0.3s; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        color: #ffffff;           /* 文字を白に */
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;      /* 角を丸く（カプセル型） */
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        font-size: 0.9rem;
     }
-    .btn-edit-trigger:hover { transform: scale(1.05); filter: brightness(1.2); }
+    .btn-edit-trigger:hover { 
+        transform: scale(1.05); 
+        filter: brightness(1.1);
+        box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
+    }
 
     /* メインレイアウト */
     .main-content { display: flex; gap: 25px; margin-bottom: 25px; align-items: flex-start; }
@@ -206,23 +217,50 @@
 </a>
 
 <script>
-    /* JavaScript部分は変更なし */
     let allPosts = [];
     let currentPost = {};
     let postId = null;
     const currentPos = { main: 0, sub: 0 };
 
+    const currentUser = {
+        id: localStorage.getItem('userId') || "guest_user",
+        role: localStorage.getItem('userRole') || "user"
+    };
+
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
         postId = urlId ? parseInt(urlId) : null;
+
         fetch('/api/posts').then(res => res.json()).then(data => {
             allPosts = data;
             currentPost = allPosts.find(p => p.id == postId);
-            if (!currentPost) { alert("投稿が見つかりませんでした。"); window.location.href = "list.html"; return; }
+            
+            if (!currentPost) { 
+                alert("投稿が見つかりませんでした。"); 
+                window.location.href = "list.html"; 
+                return; 
+            }
+
             renderAll();
+            checkPermission(); // ★追加：権限があるか確認する
+            
         }).catch(err => console.error("通信エラー:", err));
     };
+
+    // --- ★追加：権限チェック関数 ---
+    function checkPermission() {
+        const editBtn = document.querySelector('.btn-edit-trigger');
+        
+        // 1. 投稿者本人であるか
+        const isAuthor = (currentPost.authorId === currentUser.id);
+        // 2. または最高管理者であるか
+        const isAdmin = (currentUser.role === "admin");
+
+        if (isAuthor || isAdmin) {
+            editBtn.style.display = "block"; // 条件に合えばボタンを出す
+        }
+    }
 
     function renderAll() {
         document.getElementById('display-title').innerText = currentPost.title || "無題";
