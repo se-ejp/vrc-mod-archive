@@ -4,53 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>新規投稿 - VRC改変アーカイブ</title>
+    <link rel="stylesheet" href="common.css">
 <style>
-    /* 共通背景・全体設定 */
-    body { font-family: sans-serif; margin: 0; background-color: #0b0e1a; color: #e0e6ed; min-height: 100vh; overflow-y: auto; }
-    .bg-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 125vh; z-index: -1; background-image: url('bg-pattern.jpg'); background-size: cover; pointer-events: none; }
-    
-    .navbar { background: rgba(10, 15, 30, 0.7); backdrop-filter: blur(12px); padding: 15px 0; text-align: center; border-bottom: 1px solid rgba(0, 242, 255, 0.2); position: sticky; top: 0; z-index: 100; }
-    .nav-logo { color: #00f2ff; text-decoration: none; font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
-
+    /* 投稿画面専用のスタイル */
     .container { max-width: 800px; margin: auto; padding: 20px 20px 60px 20px; box-sizing: border-box; }
     h1 { color: #fff; text-shadow: 0 0 8px rgba(0, 255, 255, 0.8); text-align: center; margin-bottom: 30px; }
 
-    /* スラッシュカットパネル */
     .form-panel { 
-        position: relative;
-        padding: 40px; 
-        background: #00f2ff; 
+        position: relative; padding: 40px; background: #00f2ff; 
         clip-path: polygon(50px 0%, 100% 0%, 100% calc(100% - 50px), calc(100% - 50px) 100%, 0% 100%, 0% 50px);
         margin-bottom: 30px;
     }
     .form-panel::before {
-        content: ""; position: absolute;
-        top: 2px; left: 2px; right: 2px; bottom: 2px;
+        content: ""; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px;
         background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
         clip-path: inherit; z-index: 1;
     }
     .form-content { position: relative; z-index: 2; }
 
-    /* 入力パーツ */
     label { display: block; margin-top: 20px; margin-bottom: 8px; color: #00f2ff; font-weight: bold; font-size: 0.9rem; }
-    
     input[type="text"], input[type="url"], textarea {
         width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; 
-        color: #fff; /* 入力した文字色 */
-        box-sizing: border-box; outline: none;
+        color: #fff; box-sizing: border-box; outline: none;
     }
-
-    /* ★プレースホルダー（ヒント文字）を白にする設定 */
-    input::placeholder, 
-    textarea::placeholder {
-        color: #ffffff !important;
-        opacity: 1; /* ブラウザ標準の透明化を無効にする */
-    }
-
+    input::placeholder, textarea::placeholder { color: #ffffff !important; opacity: 1; }
     input:focus, textarea:focus { border-color: #00f2ff; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
 
-    /* 以下、機能パーツのスタイル（変更なし） */
     .used-item-row, .url-row { display: flex; gap: 8px; margin-bottom: 8px; }
     .used-item-row input:nth-child(1) { flex: 1; }
     .used-item-row input:nth-child(2) { flex: 2; }
@@ -81,91 +61,75 @@
     .submit-btn:hover { transform: scale(1.02); filter: brightness(1.2); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
 
     @media (max-width: 768px) {
-        .form-panel { padding: 25px 15px; clip-path: polygon(30px 0%, 100% 0%, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0% 100%, 0% 30px); }
-        .used-item-row { flex-direction: column; }
+        .form-panel { padding: 25px 15px; clip-path: polygon(30px 0%, 100% 0%, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0% 100%, 0% 30px); } 
     }
 </style>
 </head>
 <body>
 
 <div class="bg-fixed"></div>
-<nav class="navbar"><a href="index.html" class="nav-logo">VRC改変アーカイブ</a></nav>
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">VRC改変アーカイブ</a>
+    <div id="user-display" class="user-menu-container"></div>
+</nav>
 
 <div class="container">
     <h1>新規投稿を作成</h1>
-
     <div class="form-panel">
         <div class="form-content">
             <label>タイトル</label>
             <input type="text" id="input-title" placeholder="例：黒を基調としたパーティードレス改変">
-
             <label>アバター名</label>
             <input type="text" id="input-avatar" placeholder="使用したアバターの名前">
-
             <label>使用したもの（名前とURL）</label>
             <div id="used-items-list"></div>
             <button onclick="addUsedItemInput()" class="btn-add">＋ アイテムを追加</button>
-
             <label>メイン画像</label>
             <div id="preview-main" class="preview-container"></div>
             <div id="drop-main" class="drop-zone" onclick="document.getElementById('file-main').click()">画像をドロップまたはクリック</div>
             <input type="file" id="file-main" multiple style="display:none" onchange="handleFiles(this.files, 'main')">
-
             <label>解説画像（手順の説明など）</label>
             <div id="preview-sub" class="preview-container"></div>
             <div id="drop-sub" class="drop-zone" onclick="document.getElementById('file-sub').click()">画像をドロップまたはクリック</div>
             <input type="file" id="file-sub" multiple style="display:none" onchange="handleFiles(this.files, 'sub')">
-
             <label>解説テキスト</label>
             <textarea id="input-method" rows="8" placeholder="改変のコツや手順をメモしてください"></textarea>
-
             <label>参考投稿（URL）</label>
             <div id="url-list"></div>
             <button onclick="addUrlInput()" class="btn-add">＋ URLを追加</button>
-
             <button onclick="savePost()" class="submit-btn">投稿を保存する</button>
         </div>
     </div>
 </div>
 
+<script src="common.js"></script>
 <script>
-let postData = { mainImgs: [], subImgs: [] };
+    let postData = { mainImgs: [], subImgs: [] };
 
-    // --- ログインユーザー情報の取得 ---
-    const currentUser = {
-        id: localStorage.getItem('userId'),
-        role: localStorage.getItem('userRole')
-    };
-
-    // --- ★追加：未ログインならログイン画面へ飛ばす ---
-    window.onload = () => { 
-        if (!currentUser.id) {
+    // ログインチェック（DOM読み込み後に実行）
+    window.addEventListener('DOMContentLoaded', () => {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
             alert("投稿するにはログインが必要です。");
             window.location.href = "login.html";
             return;
         }
         addUsedItemInput(); 
         addUrlInput(); 
-    };
+    });
 
+    // 投稿専用の関数群
     function addUsedItemInput(name = "", url = "") {
         const div = document.createElement('div');
         div.className = 'used-item-row';
-        div.innerHTML = `
-            <input type="text" class="used-item-name" placeholder="アイテム名" value="${name}">
-            <input type="url" class="used-item-url" placeholder="URL" value="${url}">
-            <button class="btn-delete" onclick="this.parentElement.remove()">ー</button>
-        `;
+        div.innerHTML = `<input type="text" class="used-item-name" placeholder="アイテム名" value="${name}"><input type="url" class="used-item-url" placeholder="URL" value="${url}"><button class="btn-delete" onclick="this.parentElement.remove()">ー</button>`;
         document.getElementById('used-items-list').appendChild(div);
     }
 
     function addUrlInput(val = "") {
         const div = document.createElement('div');
         div.className = 'url-row';
-        div.innerHTML = `
-            <input type="url" class="url-input" value="${val}" placeholder="https://...">
-            <button class="btn-delete" onclick="this.parentElement.remove()">ー</button>
-        `;
+        div.innerHTML = `<input type="url" class="url-input" value="${val}" placeholder="https://..."><button class="btn-delete" onclick="this.parentElement.remove()">ー</button>`;
         document.getElementById('url-list').appendChild(div);
     }
 
@@ -180,8 +144,7 @@ let postData = { mainImgs: [], subImgs: [] };
                     postData[key + 'Imgs'].push(data.url);
                     renderPreviews(key);
                 }
-            })
-            .catch(err => alert("アップロード失敗"));
+            }).catch(err => alert("アップロード失敗"));
         });
     }
 
@@ -196,10 +159,7 @@ let postData = { mainImgs: [], subImgs: [] };
 
     function renderPreviews(key) {
         document.getElementById(`preview-${key}`).innerHTML = postData[key + 'Imgs'].map((src, i) => `
-            <div class="thumb-wrapper">
-                <img src="${src}">
-                <button class="del-btn" onclick="removeImg('${key}', ${i})">×</button>
-            </div>
+            <div class="thumb-wrapper"><img src="${src}"><button class="del-btn" onclick="removeImg('${key}', ${i})">×</button></div>
         `).join('');
     }
     function removeImg(key, i) { postData[key + 'Imgs'].splice(i, 1); renderPreviews(key); }
@@ -207,14 +167,14 @@ let postData = { mainImgs: [], subImgs: [] };
     function savePost() {
         const title = document.getElementById('input-title').value;
         if(!title) { alert("タイトルを入力してください"); return; }
+        const userId = localStorage.getItem('userId');
+        const nickname = localStorage.getItem('userNickname');
 
         const newPost = {
             id: Date.now(),
             title: title,
-            // --- ★ログイン情報を確実に紐づけ ---
-            authorId: currentUser.id, 
-            authorName: currentUser.id, // 表示用（IDをそのまま名前として使用）
-            // -------------------------
+            authorId: userId, 
+            authorName: nickname || userId,
             avatarName: document.getElementById('input-avatar').value,
             usedItems: Array.from(document.querySelectorAll('.used-item-row')).map(row => ({
                 name: row.querySelector('.used-item-name').value,
@@ -242,8 +202,7 @@ let postData = { mainImgs: [], subImgs: [] };
                     alert("サーバーに保存しました！");
                     window.location.href = "index.html";
                 }
-            })
-            .catch(err => alert("保存に失敗しました"));
+            }).catch(err => alert("保存に失敗しました"));
     }
 </script>
 </body>

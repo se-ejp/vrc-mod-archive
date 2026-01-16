@@ -3,5 +3,17 @@
         "id": "see",
         "password": "seigo112539",
         "role": "user"
+    },
+    {
+        "id": "super1080",
+        "password": "ryuga1008",
+        "nickname": "りゅう",
+        "role": "user"
+    },
+    {
+        "id": "1185kmkr",
+        "password": "1582ODNB",
+        "nickname": "Boys, be ambitious.",
+        "role": "user"
     }
 ]

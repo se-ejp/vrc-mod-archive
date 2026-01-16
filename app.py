@@ -80,7 +80,8 @@ def register():
     
     users.append({
         "id": data['id'],
-        "password": data['password'], # 本来は暗号化推奨
+        "password": data['password'],
+        "nickname": data.get('nickname', data['id']), # ニックネームを追加（なければIDを使う）
         "role": "user"
     })
     save_users(users)
@@ -93,7 +94,12 @@ def login():
     user = next((u for u in users if u['id'] == data['id'] and u['password'] == data['password']), None)
     
     if user:
-        return jsonify({"status": "success", "user": user})
+        # 返すデータに nickname も含める
+        return jsonify({"status": "success", "user": {
+            "id": user['id'],
+            "nickname": user.get('nickname', user['id']),
+            "role": user['role']
+        }})
     else:
         return jsonify({"status": "error", "message": "IDまたはパスワードが正しくありません"}), 401
 

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>VRC改変アーカイブ - プロフィール</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .container { max-width: 1000px; margin: auto; padding: 20px; box-sizing: border-box; min-height: 100vh; }
+        
+        /* プロフィールヘッダー */
+        .profile-header {
+            background: rgba(15, 23, 42, 0.7);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            text-align: center;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+        .profile-avatar-circle {
+            width: 100px; height: 100px;
+            background: linear-gradient(135deg, #00f2ff, #0066ff);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: white; font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+        }
+        .profile-name { font-size: 1.8rem; color: #fff; margin: 0; }
+        .profile-id { color: rgba(0, 242, 255, 0.6); font-size: 0.9rem; margin-top: 5px; }
+
+        /* 投稿一覧エリア */
+        .section-title {
+            color: #fff; border-left: 4px solid #00f2ff;
+            padding-left: 15px; margin-bottom: 25px; font-size: 1.3rem;
+        }
+        .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        
+        /* index.htmlと統一したカードデザイン */
+        .post-card { 
+            background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; 
+            transition: 0.3s; backdrop-filter: blur(5px); 
+        }
+        .post-card:hover { transform: translateY(-5px); border-color: #00f2ff; }
+        .card-img { width: 100%; height: 180px; background: #1a1f2e; object-fit: cover; }
+        .card-content { padding: 15px; }
+        .card-title { font-size: 1.1rem; font-weight: bold; margin: 0; color: #fff; }
+        .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; }
+
+        /* 追従ボタン */
+        .fab-button { 
+            position: fixed; right: 30px; bottom: 30px; 
+            background: linear-gradient(135deg, #00f2ff, #0066ff); 
+            color: white; padding: 15px 25px; border-radius: 50px; 
+            display: flex; align-items: center; gap: 8px; 
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); z-index: 1000; 
+            text-decoration: none; font-weight: bold; transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            .fab-text { display: none; }
+            .fab-button { padding: 15px; border-radius: 50%; width: 50px; height: 50px; justify-content: center; bottom: 20px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-fixed"></div>
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">VRC改変アーカイブ</a>
+    <div id="user-display" class="user-menu-container"></div>
+</nav>
+
+<div class="container">
+    <div class="profile-header">
+        <div class="profile-avatar-circle" id="avatar-initial">?</div>
+        <h1 class="profile-name" id="profile-user-name">読み込み中...</h1>
+        <div class="profile-id" id="profile-user-id">ID: ----</div>
+    </div>
+
+    <h2 class="section-title">投稿一覧</h2>
+    <div class="post-grid" id="user-post-list">
+        </div>
+</div>
+
+<a href="create.html" class="fab-button">
+    <span class="fab-icon">＋</span>
+    <span class="fab-text">新規投稿</span>
+</a>
+
+<script src="common.js"></script>
+<script>
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        const targetUserId = params.get('id');
+
+        if (!targetUserId) {
+            alert("ユーザーIDが見つかりません。");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        fetch('/api/posts')
+            .then(res => res.json())
+            .then(allPosts => {
+                // そのユーザーの投稿だけを抽出
+                const userPosts = allPosts.filter(p => p.authorId === targetUserId);
+                
+                if (userPosts.length > 0) {
+                    const authorName = userPosts[0].authorName;
+                    document.getElementById('profile-user-name').innerText = authorName;
+                    document.getElementById('profile-user-id').innerText = `ID: ${targetUserId}`;
+                    document.getElementById('avatar-initial').innerText = authorName.substring(0, 1);
+                    renderUserPosts(userPosts);
+                } else {
+                    document.getElementById('profile-user-name').innerText = "ユーザー";
+                    document.getElementById('profile-user-id').innerText = `ID: ${targetUserId}`;
+                    document.getElementById('user-post-list').innerHTML = '<p style="color:rgba(255,255,255,0.5);">まだ投稿がありません。</p>';
+                }
+            });
+    };
+
+    function renderUserPosts(posts) {
+        const container = document.getElementById('user-post-list');
+        container.innerHTML = posts.reverse().map(post => `
+            <a href="post.html?id=${post.id}" class="post-card">
+                <img src="${post.mainImgs[0] || ''}" class="card-img" alt="">
+                <div class="card-content">
+                    <h3 class="card-title">${post.title || "無題"}</h3>
+                    <div class="card-avatar">アバター: ${post.avatarName || "未設定"}</div>
+                </div>
+            </a>
+        `).join('');
+    }
+</script>
+</body>
+</html>
