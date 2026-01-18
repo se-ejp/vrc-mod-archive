@@ -3,65 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>VRC改変アーカイブ - プロフィール</title>
+    <title>プロフィール - VRC改変アーカイブ</title>
     <link rel="stylesheet" href="common.css">
     <style>
         .container { max-width: 1000px; margin: auto; padding: 20px; box-sizing: border-box; min-height: 100vh; }
         
-        /* プロフィールヘッダー */
         .profile-header {
             background: rgba(15, 23, 42, 0.7);
-            padding: 40px;
             border-radius: 12px;
             border: 1px solid rgba(0, 242, 255, 0.3);
             text-align: center;
             margin-bottom: 40px;
             backdrop-filter: blur(10px);
+            overflow: hidden;
+            padding-bottom: 30px;
         }
+
+        .cover-area {
+            width: 100%; height: 200px;
+            background: linear-gradient(45deg, #0f172a, #1e293b);
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        .avatar-wrapper { margin-top: -60px; position: relative; display: inline-block; }
         .profile-avatar-circle {
-            width: 100px; height: 100px;
+            width: 120px; height: 120px;
             background: linear-gradient(135deg, #00f2ff, #0066ff);
             border-radius: 50%;
-            margin: 0 auto 15px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 40px; color: white; font-weight: bold;
+            font-size: 50px; color: white; font-weight: bold;
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            border: 5px solid #0f172a;
+            overflow: hidden; /* 画像がはみ出ないように */
         }
-        .profile-name { font-size: 1.8rem; color: #fff; margin: 0; }
-        .profile-id { color: rgba(0, 242, 255, 0.6); font-size: 0.9rem; margin-top: 5px; }
+        .profile-avatar-circle img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
 
-        /* 投稿一覧エリア */
-        .section-title {
-            color: #fff; border-left: 4px solid #00f2ff;
-            padding-left: 15px; margin-bottom: 25px; font-size: 1.3rem;
+        /* 編集モーダル内のアップロードゾーン */
+        .modal-upload-zone {
+            width: 100%; height: 100px;
+            border: 2px dashed rgba(0, 242, 255, 0.3);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; cursor: pointer;
+            margin-bottom: 10px; transition: 0.3s;
+            background: rgba(0, 0, 0, 0.2); color: #94a3b8; font-size: 0.8rem;
+            overflow: hidden;
         }
-        .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .modal-upload-zone:hover { border-color: #00f2ff; background: rgba(0, 242, 255, 0.05); }
+        .modal-upload-zone img { width: 100%; height: 100%; object-fit: cover; }
+
+        .profile-name { font-size: 2rem; color: #fff; margin: 15px 0 5px; }
+        .profile-id { color: rgba(0, 242, 255, 0.6); font-size: 0.9rem; margin-bottom: 15px; }
+        .sns-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .sns-link { text-decoration: none; color: white; padding: 8px 18px; border-radius: 25px; font-size: 0.85rem; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+        .sns-link:hover { transform: translateY(-2px); filter: brightness(1.2); }
         
-        /* index.htmlと統一したカードデザイン */
-        .post-card { 
-            background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; 
-            transition: 0.3s; backdrop-filter: blur(5px); 
-        }
+        .section-title { color: #fff; border-left: 4px solid #00f2ff; padding-left: 15px; margin-bottom: 25px; font-size: 1.3rem; }
+        .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .post-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; transition: 0.3s; }
         .post-card:hover { transform: translateY(-5px); border-color: #00f2ff; }
-        .card-img { width: 100%; height: 180px; background: #1a1f2e; object-fit: cover; }
+        .card-img { width: 100%; height: 180px; object-fit: cover; background: #1a1f2e; }
         .card-content { padding: 15px; }
-        .card-title { font-size: 1.1rem; font-weight: bold; margin: 0; color: #fff; }
-        .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; }
-
-        /* 追従ボタン */
-        .fab-button { 
-            position: fixed; right: 30px; bottom: 30px; 
-            background: linear-gradient(135deg, #00f2ff, #0066ff); 
-            color: white; padding: 15px 25px; border-radius: 50px; 
-            display: flex; align-items: center; gap: 8px; 
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); z-index: 1000; 
-            text-decoration: none; font-weight: bold; transition: all 0.3s;
-        }
-        @media (max-width: 768px) {
-            .fab-text { display: none; }
-            .fab-button { padding: 15px; border-radius: 50%; width: 50px; height: 50px; justify-content: center; bottom: 20px; right: 20px; }
-        }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: #1a1f2e; padding: 30px; border-radius: 12px; border: 2px solid #00f2ff; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-content label { display: block; color: #00f2ff; font-size: 0.8rem; margin-top: 15px; margin-bottom: 5px; }
+        .modal-content input, .modal-content textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 6px; box-sizing: border-box; }
+        .fab-button { position: fixed; right: 30px; bottom: 30px; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; padding: 15px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); z-index: 1000; }
     </style>
 </head>
 <body>
@@ -74,64 +86,253 @@
 
 <div class="container">
     <div class="profile-header">
-        <div class="profile-avatar-circle" id="avatar-initial">?</div>
-        <h1 class="profile-name" id="profile-user-name">読み込み中...</h1>
+        <div class="cover-area" id="profile-cover"></div>
+        <div class="avatar-wrapper">
+            <div class="profile-avatar-circle" id="avatar-container">
+                <span id="avatar-initial">?</span>
+            </div>
+        </div>
+        <h1 class="profile-name" id="profile-user-name">Loading...</h1>
         <div class="profile-id" id="profile-user-id">ID: ----</div>
+        <p id="profile-bio" style="color: #cbd5e1; margin: 15px auto; font-size: 1rem; line-height: 1.6; max-width: 700px; padding: 0 20px; white-space: pre-wrap;"></p>
+        <div class="sns-container" id="profile-sns"></div>
+        <button id="edit-profile-btn" onclick="openEditModal()" style="display: none; background: rgba(0, 242, 255, 0.1); color: #00f2ff; border: 1px solid #00f2ff; padding: 10px 25px; border-radius: 30px; cursor: pointer; margin-top: 25px; font-weight: bold; transition: 0.3s;">
+            プロフィールの設定
+        </button>
     </div>
 
-    <h2 class="section-title">投稿一覧</h2>
-    <div class="post-grid" id="user-post-list">
-        </div>
+    <h2 class="section-title">投稿作品</h2>
+    <div class="post-grid" id="user-post-list"></div>
 </div>
 
-<a href="create.html" class="fab-button">
-    <span class="fab-icon">＋</span>
-    <span class="fab-text">新規投稿</span>
-</a>
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="color: #00f2ff; margin-top: 0;">プロフィールの設定</h3>
+        
+        <label>カバー画像</label>
+        <div class="modal-upload-zone" onclick="document.getElementById('file-cover').click()">
+            <div id="prompt-cover">🖼️ カバーを変更</div>
+            <img id="preview-cover" style="display:none;">
+            <input type="file" id="file-cover" style="display:none;" accept="image/*" onchange="uploadImage(this, 'cover')">
+        </div>
+        <input type="hidden" id="edit-cover-url">
+
+        <label>アイコン画像</label>
+        <div class="modal-upload-zone" onclick="document.getElementById('file-avatar').click()" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto;">
+            <div id="prompt-avatar">👤</div>
+            <img id="preview-avatar" style="display:none;">
+            <input type="file" id="file-avatar" style="display:none;" accept="image/*" onchange="uploadImage(this, 'avatar')">
+        </div>
+        <input type="hidden" id="edit-avatar-url">
+
+        <label>ニックネーム</label>
+        <input type="text" id="edit-nickname" placeholder="表示名（未入力ならユーザーIDを表示）">
+
+        <label>自己紹介</label>
+        <textarea id="edit-bio" rows="4" placeholder="改変のこだわりなど"></textarea>
+        
+        <label>X (Twitter) URL</label>
+        <input type="url" id="edit-x-url" placeholder="https://x.com/yourname">
+        
+        <label>BOOTH URL</label>
+        <input type="url" id="edit-booth-url" placeholder="https://shop.booth.pm/">
+        
+        <label>VRChat プロフィールURL</label>
+        <input type="url" id="edit-vrc-url" placeholder="https://vrchat.com/home/user/...">
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button onclick="saveProfile()" style="flex: 2; background: #00f2ff; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; color: white;">変更を保存</button>
+            <button onclick="closeEditModal()" style="flex: 1; background: #334155; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer;">キャンセル</button>
+        </div>
+    </div>
+</div>
+
+<a href="create.html" class="fab-button">＋ 新規投稿</a>
 
 <script src="common.js"></script>
 <script>
+    let currentProfileData = {};
+
     window.onload = () => {
         const params = new URLSearchParams(window.location.search);
         const targetUserId = params.get('id');
+        const myId = localStorage.getItem('userId');
 
         if (!targetUserId) {
-            alert("ユーザーIDが見つかりません。");
             window.location.href = 'index.html';
             return;
         }
 
+        if (targetUserId === myId) {
+            document.getElementById('edit-profile-btn').style.display = 'inline-block';
+        }
+
+        loadProfileData(targetUserId);
+    };
+
+    function uploadImage(input, type) {
+        if (!input.files || !input.files[0]) return;
+        
+        const prompt = document.getElementById(`prompt-${type}`);
+        const preview = document.getElementById(`preview-${type}`);
+        const hiddenInput = document.getElementById(`edit-${type}-url`);
+        
+        prompt.innerText = "⏳...";
+        const formData = new FormData();
+        formData.append('image', input.files[0]);
+
+        fetch('/api/upload', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(result => {
+                if (result.url) {
+                    hiddenInput.value = result.url;
+                    preview.src = result.url;
+                    preview.style.display = 'block';
+                    prompt.style.display = 'none';
+                }
+            })
+            .catch(() => {
+                alert("アップロード失敗");
+                prompt.innerText = "Error";
+            });
+    }
+
+    function loadProfileData(userId) {
+        fetch('/api/users')
+            .then(res => res.json())
+            .then(users => {
+                const user = users.find(u => u.id === userId) || { id: userId, name: "ユーザー" };
+                currentProfileData = user;
+                renderProfileHeader(user);
+            });
+
         fetch('/api/posts')
             .then(res => res.json())
             .then(allPosts => {
-                // そのユーザーの投稿だけを抽出
-                const userPosts = allPosts.filter(p => p.authorId === targetUserId);
-                
-                if (userPosts.length > 0) {
-                    const authorName = userPosts[0].authorName;
-                    document.getElementById('profile-user-name').innerText = authorName;
-                    document.getElementById('profile-user-id').innerText = `ID: ${targetUserId}`;
-                    document.getElementById('avatar-initial').innerText = authorName.substring(0, 1);
-                    renderUserPosts(userPosts);
-                } else {
-                    document.getElementById('profile-user-name').innerText = "ユーザー";
-                    document.getElementById('profile-user-id').innerText = `ID: ${targetUserId}`;
-                    document.getElementById('user-post-list').innerHTML = '<p style="color:rgba(255,255,255,0.5);">まだ投稿がありません。</p>';
-                }
+                const userPosts = allPosts.filter(p => p.authorId === userId);
+                renderUserPosts(userPosts);
             });
-    };
+    }
+
+    function renderProfileHeader(user) {
+        const displayName = user.nickname || user.name || "ユーザー";
+        document.getElementById('profile-user-name').innerText = displayName;
+        document.getElementById('profile-user-id').innerText = `@${user.id}`;
+        document.getElementById('profile-bio').innerText = user.bio || "自己紹介はまだありません。";
+
+        if (user.coverUrl) {
+            document.getElementById('profile-cover').style.backgroundImage = `url('${user.coverUrl}')`;
+        }
+
+        const avatarContainer = document.getElementById('avatar-container');
+        if (user.avatarUrl) {
+            avatarContainer.innerHTML = `<img src="${user.avatarUrl}" alt="avatar">`;
+        } else {
+            avatarContainer.innerHTML = `<span id="avatar-initial">${displayName.substring(0, 1)}</span>`;
+        }
+
+        const snsContainer = document.getElementById('profile-sns');
+        snsContainer.innerHTML = '';
+        const configs = [
+            { key: 'xUrl', label: 'X', color: '#1DA1F2' },
+            { key: 'boothUrl', label: 'BOOTH', color: '#fc4d50' },
+            { key: 'vrcUrl', label: 'VRChat', color: '#2bc3d5' }
+        ];
+        configs.forEach(conf => {
+            if (user[conf.key]) {
+                const link = document.createElement('a');
+                link.href = user[conf.key];
+                link.target = '_blank';
+                link.className = 'sns-link';
+                link.style.background = conf.color;
+                link.innerText = conf.label;
+                snsContainer.appendChild(link);
+            }
+        });
+    }
 
     function renderUserPosts(posts) {
         const container = document.getElementById('user-post-list');
+        if (posts.length === 0) {
+            container.innerHTML = '<p style="color:rgba(255,255,255,0.4); text-align:center; padding:40px;">まだ投稿がありません。</p>';
+            return;
+        }
         container.innerHTML = posts.reverse().map(post => `
             <a href="post.html?id=${post.id}" class="post-card">
-                <img src="${post.mainImgs[0] || ''}" class="card-img" alt="">
+                <img src="${post.mainImgs[0] || ''}" class="card-img">
                 <div class="card-content">
-                    <h3 class="card-title">${post.title || "無題"}</h3>
-                    <div class="card-avatar">アバター: ${post.avatarName || "未設定"}</div>
+                    <h3 style="margin:0; font-size:1.1rem; color:#fff;">${post.title}</h3>
+                    <p style="margin:5px 0 0; font-size:0.85rem; color:#94a3b8;">${post.avatarName || '未設定'}</p>
                 </div>
             </a>
         `).join('');
+    }
+
+    function openEditModal() {
+        document.getElementById('edit-nickname').value = currentProfileData.nickname || '';
+        document.getElementById('edit-bio').value = currentProfileData.bio || '';
+        document.getElementById('edit-cover-url').value = currentProfileData.coverUrl || '';
+        document.getElementById('edit-avatar-url').value = currentProfileData.avatarUrl || '';
+        document.getElementById('edit-x-url').value = currentProfileData.xUrl || '';
+        document.getElementById('edit-booth-url').value = currentProfileData.boothUrl || '';
+        document.getElementById('edit-vrc-url').value = currentProfileData.vrcUrl || '';
+        
+        const updatePreview = (type, url) => {
+            const preview = document.getElementById(`preview-${type}`);
+            const prompt = document.getElementById(`prompt-${type}`);
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+                prompt.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                prompt.style.display = 'block';
+            }
+        };
+        updatePreview('cover', currentProfileData.coverUrl);
+        updatePreview('avatar', currentProfileData.avatarUrl);
+        
+        document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    function saveProfile() {
+        const myId = localStorage.getItem('userId');
+        const nicknameValue = document.getElementById('edit-nickname').value;
+        const avatarUrlValue = document.getElementById('edit-avatar-url').value;
+
+        const updatedData = {
+            id: myId, 
+            nickname: nicknameValue,
+            bio: document.getElementById('edit-bio').value,
+            coverUrl: document.getElementById('edit-cover-url').value,
+            avatarUrl: avatarUrlValue,
+            xUrl: document.getElementById('edit-x-url').value,
+            boothUrl: document.getElementById('edit-booth-url').value,
+            vrcUrl: document.getElementById('edit-vrc-url').value
+        };
+
+        fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                // 右上のアイコンと名前を即時反映させるためにlocalStorageを更新
+                localStorage.setItem('userAvatar', avatarUrlValue);
+                localStorage.setItem('userNickname', nicknameValue);
+                
+                alert("プロフィールを更新しました！");
+                location.reload(); 
+            } else {
+                alert("保存に失敗しました");
+            }
+        });
     }
 </script>
 </body>

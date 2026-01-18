@@ -7,12 +7,21 @@ function updateNavbar() {
 
     const nickname = localStorage.getItem('userNickname');
     const userId = localStorage.getItem('userId');
+    const userAvatar = localStorage.getItem('userAvatar'); // 追加：アイコンURLを取得
 
     if (userId) {
-        const initial = (nickname || userId)[0].toUpperCase();
+        // アイコン画像がある場合はimgタグ、ない場合は頭文字を表示
+        let avatarContent;
+        if (userAvatar && userAvatar !== "null" && userAvatar !== "") {
+            avatarContent = `<img src="${userAvatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        } else {
+            const initial = (nickname || userId)[0].toUpperCase();
+            avatarContent = `<span>${initial}</span>`;
+        }
+
         userDisplay.innerHTML = `
-            <div class="user-icon" onclick="toggleMenu(event)">
-                <span>${initial}</span>
+            <div class="user-icon" onclick="toggleMenu(event)" style="overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                ${avatarContent}
             </div>
             <div class="dropdown-menu" id="dropdown-menu">
                 <div class="menu-header">${nickname || userId} さん</div>
@@ -55,7 +64,7 @@ window.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdown-menu');
     const container = document.getElementById('user-display');
     if (menu && container && !container.contains(e.target)) {
-        menu.classList.remove('active');
+        if (menu) menu.classList.remove('active');
     }
 });
 

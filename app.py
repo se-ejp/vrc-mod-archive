@@ -22,7 +22,7 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 POSTS_FILE = 'posts.json'
-USERS_FILE = 'users.json'  # 追加：ユーザー保存用ファイル
+USERS_FILE = 'users.json'
 
 # --- データ管理用関数 ---
 def load_posts():
@@ -70,7 +70,46 @@ def upload_image():
     file.save(save_path)
     return jsonify({"url": f"/static/uploads/{today_folder}/{filename}"})
 
-# --- ユーザー認証 API (新規追加) ---
+# --- ユーザープロフィール API (ここが重要！) ---
+@app.route('/api/users', methods=['GET', 'POST'])
+def handle_users():
+    try:
+        users = load_users()
+        
+        if request.method == 'POST':
+            updated_user = request.json
+            if not updated_user or 'id' not in updated_user:
+                return jsonify({"status": "error", "message": "ID is missing"}), 400
+            
+            found = False
+            for i, user in enumerate(users):
+                # 辞書型であることを確認してからIDを比較
+                if isinstance(user, dict) and user.get('id') == updated_user['id']:
+                    # 既存のデータを壊さないようにマージ
+                    users[i].update(updated_user)
+                    found = True
+                    break
+            
+            if not found:
+                users.append(updated_user)
+                
+            save_users(users)
+            return jsonify({"status": "success"})
+        
+        # GETリクエスト: 安全にパスワードを除外して返す
+        safe_users = []
+        for u in users:
+            if isinstance(u, dict):
+                safe_user = {k: v for k, v in u.items() if k != 'password'}
+                safe_users.append(safe_user)
+            
+        return jsonify(safe_users)
+        
+    except Exception as e:
+        print(f"Error in handle_users: {e}") # サーバーの画面にエラーを表示
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- ユーザー認証 API ---
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
@@ -81,8 +120,12 @@ def register():
     users.append({
         "id": data['id'],
         "password": data['password'],
-        "nickname": data.get('nickname', data['id']), # ニックネームを追加（なければIDを使う）
-        "role": "user"
+        "nickname": data.get('nickname', data['id']),
+        "role": "user",
+        "bio": "",
+        "xUrl": "",
+        "boothUrl": "",
+        "vrcUrl": ""
     })
     save_users(users)
     return jsonify({"status": "success"})
@@ -94,7 +137,6 @@ def login():
     user = next((u for u in users if u['id'] == data['id'] and u['password'] == data['password']), None)
     
     if user:
-        # 返すデータに nickname も含める
         return jsonify({"status": "success", "user": {
             "id": user['id'],
             "nickname": user.get('nickname', user['id']),

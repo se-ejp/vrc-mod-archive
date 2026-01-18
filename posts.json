@@ -62,6 +62,12 @@
         "authorId": "1185kmkr",
         "authorName": "Boys, be ambitious.",
         "avatarName": "白雨",
+        "comments": [
+            {
+                "authorName": "ゲスト",
+                "text": "じぶんでかえ"
+            }
+        ],
         "id": 1768564349836,
         "mainImgs": [
             "/static/uploads/2026-01-16/1768564329_IMG_5973.png"
@@ -72,11 +78,26 @@
         ],
         "subImgs": [],
         "title": "白雨買って",
-        "usedItems": [],
-        "comments": [
+        "usedItems": []
+    },
+    {
+        "authorId": "see",
+        "authorName": "see",
+        "avatarName": "ヴぁ",
+        "id": 1768747329786,
+        "mainImgs": [
+            "/static/uploads/2026-01-18/1768747312_スクリーンショット 2025-10-03 113103.png"
+        ],
+        "methodText": "キャンセルラッシュはがんばれ",
+        "refUrls": [
+            "ca"
+        ],
+        "subImgs": [],
+        "title": "プロフとアイコンできたよ",
+        "usedItems": [
             {
-                "authorName": "ゲスト",
-                "text": "じぶんでかえ"
+                "name": "あヴぁヴぁ",
+                "url": "https://www.youtube.com/watch?v=KzITEaavf7c"
             }
         ]
     }

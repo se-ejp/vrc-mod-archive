@@ -6,7 +6,6 @@
     <title>VRC改変アーカイブ - ホーム</title>
     <link rel="stylesheet" href="common.css">
 <style>
-    /* index.html 固有のスタイル（ヒーローエリアと投稿カード） */
     .container { max-width: 1000px; margin: auto; padding: 20px; box-sizing: border-box; min-height: 100vh; }
     
     .hero { 
@@ -41,7 +40,62 @@
     .card-content { padding: 15px; }
     .card-title { font-size: 1.1rem; font-weight: bold; margin: 0; color: #fff; }
     .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; }
-    .card-author { font-size: 0.75rem; color: #00f2ff; margin-top: 5px; opacity: 0.8; }
+    
+    .card-author-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        position: relative;
+        z-index: 10;
+    }
+    .author-clickable {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .author-clickable:hover {
+        filter: brightness(1.3);
+    }
+    .author-clickable:hover .card-author-name {
+        text-decoration: underline;
+    }
+
+    .mini-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #334155;
+        border: 1px solid rgba(0, 242, 255, 0.3);
+    }
+    .mini-avatar-placeholder {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00f2ff, #0066ff);
+        color: white;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    .card-author-name {
+        font-size: 0.75rem;
+        color: #00f2ff;
+        text-decoration: none;
+        font-weight: bold;
+        opacity: 0.9;
+    }
+
+    .admin-link {
+        color: rgba(255, 255, 255, 0.2); text-decoration: none; font-size: 0.7rem; 
+        position: absolute; bottom: 10px; right: 10px; transition: 0.3s;
+    }
+    .admin-link:hover { color: #ff0055; }
 
     .fab-button { 
         position: fixed; right: 30px; bottom: 30px; 
@@ -75,11 +129,11 @@
             <a href="create.html" class="btn btn-post">＋ 新しく投稿する</a>
             <a href="list.html" class="btn btn-list">🔍 投稿一覧を見る</a>
         </div>
+        <a href="#" onclick="adminLogin(); return false;" class="admin-link">Admin System</a>
     </div>
 
     <h2>最新の改変投稿</h2>
-    <div class="post-grid" id="post-list">
-        </div>
+    <div id="post-list" class="post-grid"></div>
     <div style="height: 100px;"></div>
 </div>
 
@@ -90,40 +144,73 @@
 
 <script src="common.js"></script>
 <script>
-    // 投稿を読み込むスクリプト
-    function loadPosts() {
+    async function loadPosts() {
         const container = document.getElementById('post-list');
-        fetch('/api/posts')
-            .then(res => res.json())
-            .then(allPosts => {
-                if (!allPosts || allPosts.length === 0) {
-                    container.innerHTML = 'まだ投稿がありません。';
-                    return;
+        
+        try {
+            const [postsRes, usersRes] = await Promise.all([
+                fetch('/api/posts'),
+                fetch('/api/users')
+            ]);
+            
+            const allPosts = await postsRes.json();
+            const allUsers = await usersRes.json();
+
+            if (!allPosts || allPosts.length === 0) {
+                container.innerHTML = 'まだ投稿がありません。';
+                return;
+            }
+
+            container.innerHTML = allPosts.reverse().map(post => {
+                const author = allUsers.find(u => u.id === post.authorId) || {};
+                const displayName = author.nickname || post.authorName || "不明";
+                
+                let avatarHtml;
+                if (author.avatarUrl) {
+                    avatarHtml = `<img src="${author.avatarUrl}" class="mini-avatar" alt="">`;
+                } else {
+                    const initial = displayName.substring(0, 1).toUpperCase();
+                    avatarHtml = `<div class="mini-avatar-placeholder">${initial}</div>`;
                 }
-                // 最新の3件だけ表示する場合は .slice(0, 3) を追加してもOKです
-                container.innerHTML = allPosts.reverse().map(post => `
+
+                return `
                     <div class="post-card">
-                        <a href="post.html?id=${post.id}" style="text-decoration: none; color: inherit;">
+                        <a href="post.html?id=${post.id}" style="text-decoration: none; color: inherit; display: block;">
                             <img src="${post.mainImgs[0] || ''}" class="card-img" alt="">
                             <div class="card-content">
                                 <h3 class="card-title">${post.title || "無題"}</h3>
                                 <div class="card-avatar">アバター: ${post.avatarName || "未設定"}</div>
+                                
+                                <div class="card-author-row">
+                                    <div class="author-clickable" onclick="event.preventDefault(); location.href='profile.html?id=${post.authorId}'">
+                                        ${avatarHtml}
+                                        <span class="card-author-name">${displayName}</span>
+                                    </div>
+                                </div>
                             </div>
                         </a>
-                        <div class="card-content" style="padding-top: 0; margin-top: -10px;">
-                            <div class="card-author">
-                                投稿者: <a href="profile.html?id=${post.authorId}" style="color: #00f2ff; text-decoration: none; position: relative; z-index: 10;">${post.authorName || "不明"}</a>
-                            </div>
-                        </div>
                     </div>
-                `).join('');
-            })
-            .catch(err => {
-                container.innerHTML = 'データの読み込みに失敗しました。';
-            });
+                `;
+            }).join('');
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = 'データの読み込みに失敗しました。';
+        }
     }
 
-    // common.jsの読み込みが終わったタイミングで実行
+    if (typeof adminLogin !== 'function') {
+        window.adminLogin = function() {
+            const pass = prompt("管理者パスワードを入力してください:");
+            if (pass === "seigo1125") {
+                localStorage.setItem('role', 'admin');
+                alert("Masterとしてログインしました。");
+                location.reload();
+            } else {
+                alert("パスワードが違います。");
+            }
+        };
+    }
+
     window.addEventListener('DOMContentLoaded', loadPosts);
 </script>
 </body>
