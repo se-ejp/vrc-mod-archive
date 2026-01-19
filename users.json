@@ -4,18 +4,33 @@
         "password": "seigo112539",
         "role": "user",
         "bio": "可愛い改変が好き",
-        "coverUrl": "/static/uploads/2026-01-18/1768746075_スクリーンショット 2025-07-11 120211.png",
+        "coverUrl": "/static/uploads/2026-01-19/1768808905_スクリーンショット 2025-07-11 120211.png",
         "xUrl": "https://x.com/Chamu_mame_0126",
-        "boothUrl": "",
+        "boothUrl": "ba",
         "vrcUrl": "https://vrchat.com/home/user/usr_1f197319-5d86-4cec-b82d-8a5dadbd9070",
-        "avatarUrl": "/static/uploads/2026-01-18/1768746868_スクリーンショット 2025-07-11 223621.png",
-        "nickname": "see"
+        "avatarUrl": "/static/uploads/2026-01-19/1768808898_スクリーンショット 2025-07-11 223621.png",
+        "nickname": "see",
+        "useAvatarName": "fa",
+        "useAvatarUrl": "fa?",
+        "useAvatars": [
+            {
+                "name": "水瀬",
+                "url": "売ってない"
+            }
+        ],
+        "pinnedPostId": null
     },
     {
         "id": "super1080",
         "password": "ryuga1008",
         "nickname": "りゅう",
-        "role": "user"
+        "role": "user",
+        "bio": "",
+        "coverUrl": "",
+        "avatarUrl": "/static/uploads/2026-01-19/1768808428_スクリーンショット 2025-07-11 223621.png",
+        "xUrl": "",
+        "boothUrl": "",
+        "vrcUrl": ""
     },
     {
         "id": "1185kmkr",

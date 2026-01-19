@@ -41,35 +41,14 @@
     .card-title { font-size: 1.1rem; font-weight: bold; margin: 0; color: #fff; }
     .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; margin-bottom: 12px; }
     
-    /* --- 新：情報の横並び設定 --- */
-    .card-footer-info {
-        display: flex;
-        align-items: center;
-        gap: 12px; /* ボタンと投稿者の間隔 */
-    }
+    .card-footer-info { display: flex; align-items: center; gap: 12px; }
 
-    /* --- ミニいいねボタン（横並び用） --- */
     .btn-like-mini {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 77, 109, 0.2);
-        color: #fff;
-        padding: 4px 10px;
-        border-radius: 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 0.8rem;
-        transition: 0.2s;
-        z-index: 20;
+        background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 77, 109, 0.2);
+        color: #fff; padding: 4px 10px; border-radius: 20px; cursor: pointer;
+        display: flex; align-items: center; gap: 4px; font-size: 0.8rem; transition: 0.2s; z-index: 20;
     }
-    .btn-like-mini.active {
-        background: rgba(255, 77, 109, 0.2);
-        border-color: #ff4d6d;
-        color: #ff4d6d;
-        box-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
-    }
-    .btn-like-mini:active .mini-heart { transform: scale(1.4); }
+    .btn-like-mini.active { background: rgba(255, 77, 109, 0.2); border-color: #ff4d6d; color: #ff4d6d; box-shadow: 0 0 10px rgba(255, 77, 109, 0.3); }
     .mini-heart { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
 
     .card-author-row { display: flex; align-items: center; gap: 8px; position: relative; z-index: 10; }
@@ -125,6 +104,25 @@
 <script src="common.js"></script>
 <script>
     let g_allPosts = []; 
+
+    // ★追加：ログイン情報の同期（ログイン直後やリロード時にアイコンを反映させる）
+    async function syncUserData() {
+        const myId = localStorage.getItem('userId');
+        if (!myId) return;
+
+        try {
+            const res = await fetch('/api/users');
+            const users = await res.json();
+            const me = users.find(u => u.id === myId);
+            if (me) {
+                localStorage.setItem('userAvatar', me.avatarUrl || '');
+                localStorage.setItem('userNickname', me.nickname || me.name || '');
+                // 右上の表示を最新に反映（common.jsの関数があれば呼ぶ、なければ直接書き換え）
+                const navIcon = document.querySelector('.nav-user-icon');
+                if (navIcon && me.avatarUrl) navIcon.src = me.avatarUrl;
+            }
+        } catch (e) { console.error("Sync failed", e); }
+    }
 
     async function loadPosts() {
         const container = document.getElementById('post-list');
@@ -230,7 +228,11 @@
         };
     }
 
-    window.addEventListener('DOMContentLoaded', loadPosts);
+    // 両方の初期化を走らせる
+    window.addEventListener('DOMContentLoaded', () => {
+        syncUserData();
+        loadPosts();
+    });
 </script>
 </body>
 </html>

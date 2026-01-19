@@ -5,122 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>VRC改変アーカイブ - 詳細</title>
     <link rel="stylesheet" href="common.css">
-<style>
-    /* --- 全体レイアウト --- */
-    .container { max-width: 1100px; margin: auto; padding: 0 20px 40px 20px; box-sizing: border-box; }
-    .btn-back { display: inline-block; text-decoration: none; color: #00f2ff; font-weight: bold; margin: 20px 0; transition: 0.3s; opacity: 0.8; }
-    .post-header { display: flex; align-items: center; gap: 20px; margin: 20px 0; justify-content: space-between; }
-    .post-title-display { font-size: 2rem; font-weight: bold; color: #fff; text-shadow: 0 0 12px rgba(0, 242, 255, 0.8); margin: 0; }
+    <style>
+        /* --- 全体レイアウト --- */
+        .container { max-width: 1100px; margin: auto; padding: 0 20px 40px 20px; box-sizing: border-box; }
+        .btn-back { display: inline-block; text-decoration: none; color: #00f2ff; font-weight: bold; margin: 20px 0; transition: 0.3s; opacity: 0.8; }
+        .btn-back:hover { opacity: 1; text-shadow: 0 0 8px #00f2ff; }
+        .post-header { display: flex; align-items: center; gap: 20px; margin: 20px 0; justify-content: space-between; }
+        .post-title-display { font-size: 2rem; font-weight: bold; color: #fff; text-shadow: 0 0 12px rgba(0, 242, 255, 0.8); margin: 0; }
 
-    /* --- いいねボタンのスタイル (ハート・ピンク・アニメーション) --- */
-    .actions-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-    .btn-like {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 77, 109, 0.3);
-        color: #fff;
-        padding: 8px 18px;
-        border-radius: 50px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: 0.3s;
-        font-weight: bold;
-    }
-    .btn-like:hover { background: rgba(255, 77, 109, 0.1); border-color: #ff4d6d; }
-    .btn-like.active {
-        background: rgba(255, 77, 109, 0.2);
-        border-color: #ff4d6d;
-        color: #ff4d6d;
-        box-shadow: 0 0 15px rgba(255, 77, 109, 0.4);
-    }
-    .like-icon { 
-        font-size: 1.1rem; 
-        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        display: inline-block;
-    }
-    .btn-like:active .like-icon { 
-        transform: scale(1.5); 
-    }
+        /* --- タグ表示スタイル --- */
+        .post-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag-link { background: rgba(0, 242, 255, 0.1); color: #00f2ff; border: 1px solid rgba(0, 242, 255, 0.3); padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; text-decoration: none; transition: 0.3s; }
+        .tag-link:hover { background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; box-shadow: 0 0 8px rgba(0, 242, 255, 0.4); }
 
-    /* --- メインコンテンツ --- */
-    .main-content { display: flex; gap: 30px; margin-bottom: 25px; align-items: stretch; }
-    .slider-column { flex: 1.5; min-width: 0; }
-    .info-column { flex: 1; display: flex; flex-direction: column; }
-    .info-column .section { height: 100%; margin-bottom: 0; box-sizing: border-box; }
+        /* --- 投稿者情報のホバー設定 --- */
+        .author-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            text-decoration: none; 
+            transition: 0.3s; 
+            opacity: 0.9;
+        }
+        .author-link:hover { 
+            opacity: 1; 
+            filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.5));
+        }
+        .author-link:hover .author-avatar {
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.8);
+        }
+        .author-link:hover .author-name {
+            color: #00f2ff !important;
+        }
+        .author-avatar { transition: 0.3s; }
 
-    /* --- 投稿者情報のスタイル --- */
-    .author-info-box { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed rgba(0, 242, 255, 0.3); }
-    .author-flex { display: flex; align-items: center; gap: 15px; }
-    .author-info-text-group { display: flex; flex-direction: column; justify-content: center; }
-    .author-label { font-size: 0.7rem; color: #00f2ff; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 2px; }
+        /* --- いいねボタン --- */
+        .actions-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .btn-like {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 77, 109, 0.3); color: #fff;
+            padding: 8px 18px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; font-weight: bold;
+        }
+        .btn-like:hover { background: rgba(255, 77, 109, 0.1); border-color: #ff4d6d; }
+        .btn-like.active { background: rgba(255, 77, 109, 0.2); border-color: #ff4d6d; color: #ff4d6d; box-shadow: 0 0 15px rgba(255, 77, 109, 0.4); }
 
-    /* アイコン設定 */
-    .author-avatar-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #00f2ff; flex-shrink: 0; transition: 0.2s; }
-    .author-avatar-placeholder { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; flex-shrink: 0; border: 2px solid #00f2ff; transition: 0.2s; }
-    
-    .author-flex a:hover .author-avatar-img,
-    .author-flex a:hover .author-avatar-placeholder { filter: brightness(1.3); transform: scale(1.05); }
+        /* --- 編集フォーム --- */
+        .edit-form-box { display: none; width: 100%; background: rgba(10, 15, 30, 0.98); padding: 30px; border: 2px solid #00f2ff; border-radius: 8px; margin-bottom: 30px; box-sizing: border-box; z-index: 2000; position: relative; }
+        .edit-form-box label { display: block; margin-top: 15px; color: #00f2ff; font-size: 0.85rem; font-weight: bold; }
+        .edit-form-box input, .edit-form-box textarea { width: 100%; padding: 12px; margin-top: 5px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; color: #fff; box-sizing: border-box; font-family: inherit; outline: none; }
+        
+        .row-item { display: flex; gap: 8px; margin-top: 8px; align-items: stretch; }
+        .row-item input { margin-top: 0 !important; flex: 1; }
+        
+        .btn-row-del { 
+            background: #ff4d4d; color: white; border: none; width: 44px; border-radius: 4px; 
+            cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .btn-add-row { background: #00d28d; border: none; padding: 10px 18px; border-radius: 4px; color: white; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 0.85rem; }
 
-    .author-name-text { color: #fff; font-size: 1.1rem; font-weight: bold; line-height: 1.2; text-decoration: none; }
-    .author-name-text:hover { text-decoration: underline; color: #00f2ff; }
-    .author-id-text { font-size: 0.7rem; color: rgba(255, 255, 255, 0.4); margin-top: 2px; }
+        /* --- 表示セクション --- */
+        .section { background: rgba(15, 23, 42, 0.7); padding: 25px; border-radius: 8px; border: 1px solid rgba(0, 242, 255, 0.2); backdrop-filter: blur(10px); margin-bottom: 20px; }
+        h3 { color: #00f2ff; margin-top: 0; border-left: 4px solid #00f2ff; padding-left: 10px; font-size: 1.2rem; }
 
-    /* 編集フォームのスタイル */
-    .edit-form-box { display: none; width: 100%; background: rgba(10, 15, 30, 0.98); padding: 30px; border: 2px solid #00f2ff; border-radius: 8px; margin-bottom: 30px; box-sizing: border-box; }
-    .edit-form-box label { display: block; margin-top: 15px; color: #00f2ff; font-size: 0.85rem; font-weight: bold; }
-    .edit-form-box input, .edit-form-box textarea { width: 100%; padding: 12px; margin-top: 5px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; color: #fff; box-sizing: border-box; }
-    
-    .row-item { display: flex; gap: 8px; align-items: stretch; margin-top: 8px; }
-    .row-item input { margin-top: 0 !important; }
+        /* リンクのホバーデザイン */
+        #display-used-list a, #display-ref-list a { 
+            color: #fff; 
+            text-decoration: none; 
+            transition: 0.2s; 
+        }
+        #display-used-list a:hover, #display-ref-list a:hover { 
+            color: #00f2ff; 
+            text-decoration: none; 
+        }
 
-    .btn-row-del { 
-        background: #ff4d4d; color: white; border: none; width: 40px; min-width: 40px; 
-        border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; 
-        align-items: center; justify-content: center; align-self: stretch; transition: 0.2s;
-    }
-    .btn-row-del:hover { background: #ff3333; }
+        /* --- コメントセクション --- */
+        .comment-item { display: flex; gap: 12px; padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); position: relative; }
+        .comment-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00f2ff, #0066ff); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; color: white; flex-shrink: 0; }
+        .comment-info { flex: 1; display: flex; flex-direction: column; }
+        .comment-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .comment-author { color: #00f2ff; font-size: 0.85rem; font-weight: bold; text-decoration: none; cursor: pointer; }
+        .comment-author:hover { text-decoration: underline; }
+        .comment-date { color: rgba(255, 255, 255, 0.3); font-size: 0.7rem; margin-left: 8px; }
+        .comment-text { color: #fff; line-height: 1.5; margin-bottom: 8px; white-space: pre-wrap; }
+        .comment-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; min-height: 32px; }
+        
+        .btn-reply-trigger { background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.4); color: #fff; cursor: pointer; padding: 5px 14px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; transition: 0.3s; }
+        .btn-reply-trigger:hover { background: rgba(0, 242, 255, 0.3); border-color: #00f2ff; }
+        
+        .toggle-replies-btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 0.85rem; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .toggle-replies-btn:hover { color: #00f2ff; }
+        
+        .replies-container { display: none; margin-top: 10px; border-left: 2px solid rgba(255, 255, 255, 0.1); padding-left: 15px; }
+        .reply-item { display: flex; gap: 10px; padding: 8px 0; }
+        .reply-avatar { width: 24px; height: 24px; border-radius: 50%; background: #444; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+        .comment-menu-trigger { background: none; border: none; color: rgba(255, 255, 255, 0.4); cursor: pointer; padding: 0 8px; font-size: 1.2rem; }
+        .comment-dropdown { position: absolute; right: 10px; top: 45px; background: #1a1f2e; border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 4px; display: none; flex-direction: column; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .comment-dropdown button { background: none; border: none; color: #fff; padding: 12px 24px; text-align: left; cursor: pointer; font-size: 0.9rem; }
+        .reply-input-box { display: none; margin-top: 15px; padding: 12px; background: rgba(0, 242, 255, 0.05); border-radius: 4px; border-left: 4px solid #00f2ff; }
+        .reply-textarea { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(0, 242, 255, 0.3); color: #fff; padding: 10px; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box; font-family: inherit; resize: vertical; }
 
-    #display-used-list li a, #display-ref-list li a { color: #ffffff; text-decoration: none; display: block; padding: 5px 0; transition: 0.2s; }
-    #display-used-list li a:hover, #display-ref-list li a:hover { color: #00f2ff; text-decoration: none; }
+        /* --- スライダーのデザイン調整 --- */
+        .slider-outer { position: relative; padding: 0 45px; }
+        .slider-viewport { width: 100%; height: 500px; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .slide-track { display: flex; transition: transform 0.4s ease-in-out; height: 100%; }
+        .slide-track img { min-width: 100%; height: 100%; object-fit: contain; }
+        
+        /* 矢印のホバーエフェクト追加 */
+        .slide-btn { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background: none; 
+            border: none; 
+            font-size: 40px; 
+            color: #00f2ff; 
+            cursor: pointer; 
+            z-index: 10; 
+            transition: 0.3s ease; 
+            opacity: 0.7;
+            outline: none;
+        }
+        .slide-btn:hover { 
+            opacity: 1; 
+            transform: translateY(-50%) scale(1.1); 
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.8), 0 0 5px #fff;
+        }
+        .prev { left: 0px; } .next { right: 0px; }
 
-    .btn-edit-trigger { display: none; background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: #ffffff; border: none; padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); font-size: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.2); white-space: nowrap; }
-    .btn-danger-fill { background: #ff4d4d !important; color: white !important; border: none !important; cursor: pointer; font-weight: bold; transition: 0.2s; border-radius: 4px; }
-    .btn-save-fill { background: #00f2ff !important; color: white !important; border: none !important; cursor: pointer; font-weight: bold; transition: 0.2s; border-radius: 4px; }
-    
-    .fab-button { position: fixed; right: 30px; bottom: 30px; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; padding: 15px 25px; border-radius: 50px; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); z-index: 1000; text-decoration: none; font-weight: bold; transition: all 0.3s; }
-    
-    .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .thumb-wrapper { position: relative; width: 80px; height: 80px; border: 1px solid #00f2ff; border-radius: 4px; overflow: hidden; }
-    .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-    .del-btn { position: absolute; top: 0; right: 0; width: 22px; height: 22px; font-size: 14px; border-bottom-left-radius: 4px; line-height: 1; border: none; background: #ff4d4d; color: white; cursor: pointer; }
-    
-    .section { background: rgba(15, 23, 42, 0.7); padding: 25px; border-radius: 8px; border: 1px solid rgba(0, 242, 255, 0.2); backdrop-filter: blur(10px); margin-bottom: 20px; }
-    h3 { color: #00f2ff; margin-top: 0; border-left: 4px solid #00f2ff; padding-left: 10px; font-size: 1.2rem; }
-    .used-title { margin: 15px 0 10px 0; font-size: 0.9rem; color: #ffffff !important; }
-    #display-used-list, #display-ref-list { list-style: none; padding: 0; }
-    #display-method { white-space: pre-wrap; line-height: 1.8; color: #ffffff; } 
-    .comment-text { color: #ffffff; }
-    .comment-author { color: #00f2ff; font-size: 0.8rem; margin-bottom: 5px; font-weight: bold; }
-    
-    .slider-outer { position: relative; padding: 0 45px; height: 100%; }
-    .slider-viewport { width: 100%; height: 500px; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-    .slide-track { display: flex; transition: transform 0.4s ease-in-out; height: 100%; }
-    .slide-track img { min-width: 100%; height: 100%; object-fit: contain; }
-    .slide-btn { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 40px; color: #00f2ff; cursor: pointer; z-index: 10; text-shadow: 0 0 10px #00f2ff; }
-    .prev { left: 0px; } .next { right: 0px; }
-    
-    @media (max-width: 850px) { 
-        .main-content { flex-direction: column; } 
-        .slider-viewport { height: 350px; } 
-        .info-column .section { height: auto; } 
-        .post-title-display { font-size: 1.5rem; }
-        .btn-edit-trigger { padding: 6px 12px; font-size: 0.75rem; white-space: nowrap; border-radius: 30px; } 
-        .post-header { gap: 10px; margin: 15px 0; }
-    }
-</style>
+        .thumb-wrapper { position: relative; width: 80px; height: 80px; border: 1px solid #00f2ff; border-radius: 4px; overflow: hidden; }
+        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .btn-edit-trigger { display: none; background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: #fff; border: none; padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+
+        @media (max-width: 850px) { .main-content { flex-direction: column; } .slider-viewport { height: 350px; } }
+    </style>
 </head>
-<body>
+<body onclick="closeAllMenus(event)">
 
 <div class="bg-fixed"></div>
 <nav class="navbar">
@@ -128,86 +148,91 @@
     <div id="user-display" class="user-menu-container"></div>
 </nav>
 
-<a href="create.html" class="fab-button">
-    <span class="fab-icon">＋</span>
-    <span class="fab-text">新規投稿</span>
-</a>
-
 <div class="container">
     <a href="list.html" class="btn-back">← 投稿一覧に戻る</a>
 
-    <div class="post-header">
-        <h1 id="display-title" class="post-title-display">読み込み中...</h1>
-        <button onclick="toggleEdit()" class="btn-edit-trigger" id="edit-trigger-btn">✎ 編集する</button>
+    <div style="margin-bottom: 25px;">
+        <div class="post-header">
+            <h1 id="display-title" class="post-title-display">読み込み中...</h1>
+            <button onclick="toggleEdit()" class="btn-edit-trigger" id="edit-trigger-btn">✎ 編集する</button>
+        </div>
+        <div id="display-tags" class="post-tags"></div>
     </div>
 
     <div class="actions-bar">
-        <button id="like-button" class="btn-like" onclick="toggleLike()">
-            <span class="like-icon">❤️</span>
-            <span id="like-count">0</span>
-        </button>
+        <button id="like-button" class="btn-like" onclick="toggleLike()">❤️ <span id="like-count">0</span></button>
     </div>
 
     <div id="edit-form" class="edit-form-box">
         <h3>編集ページ</h3>
         <label>タイトル</label><input type="text" id="input-title">
         <label>アバター名</label><input type="text" id="input-avatar">
-        <label>使用したもの</label><div id="used-items-edit-list"></div>
-        <button onclick="addUsedItemInput()" style="background:#00d28d; border:none; padding:8px 15px; border-radius:4px; color:white; cursor:pointer; margin-top:10px;">＋ 項目を追加</button>
-        <label>メイン画像 </label><div id="preview-main-edit" class="preview-container"></div>
-        <div class="drop-zone" id="drop-main" style="border: 1px dashed #00f2ff; padding: 10px; text-align: center; margin-top: 5px; color:#00f2ff;">画像をドロップ</div>
+        
+        <label>タグ（スペース区切り）</label><input type="text" id="input-tags" placeholder="例: クール 清楚 改変">
+
+        <label>使用したもの</label>
+        <div id="used-items-edit-list"></div>
+        <button onclick="addUsedItemInput()" class="btn-add-row">＋ 項目を追加</button>
+
+        <label>メイン画像</label>
+        <div id="preview-main-edit" class="preview-container"></div>
+        <div class="drop-zone" id="drop-main" style="border:1px dashed #00f2ff; padding:20px; text-align:center; margin-top:5px; color:#00f2ff;">画像をドロップ</div>
+
         <label>解説テキスト</label><textarea id="input-method" rows="6"></textarea>
-        <label>解説画像</label><div id="preview-sub-edit" class="preview-container"></div>
-        <div class="drop-zone" id="drop-sub" style="border: 1px dashed #00f2ff; padding: 10px; text-align: center; margin-top: 5px; color:#00f2ff;">画像をドロップ</div>
-        <label>参考URL</label><div id="url-list-edit"></div>
-        <button onclick="addUrlInputEdit()" style="background:#00d28d; border:none; padding:8px 15px; border-radius:4px; color:white; cursor:pointer; margin-top:10px;">＋ URLを追加</button>
-        <div style="margin-top:40px; display:flex; gap:15px;">
-            <button onclick="updatePost()" class="btn-save-fill" style="flex:2; padding:15px; font-weight:bold;">変更をすべて保存</button>
-            <button onclick="toggleEdit()" style="flex:1; background:#4a5568; color:white; padding:15px; border:none; border-radius:4px; cursor:pointer;">キャンセル</button>
+        
+        <label>解説画像</label>
+        <div id="preview-sub-edit" class="preview-container"></div>
+        <div class="drop-zone" id="drop-sub" style="border:1px dashed #00f2ff; padding:20px; text-align:center; margin-top:5px; color:#00f2ff;">画像をドロップ</div>
+
+        <label style="margin-top: 25px;">参考投稿</label>
+        <div id="ref-urls-edit-list"></div>
+        <button onclick="addRefUrlInput()" class="btn-add-row">＋ URLを追加</button>
+
+        <div style="margin-top:30px; display:flex; gap:15px;">
+            <button onclick="updatePost()" style="flex:2; background:#00d2ff; color:#fff; border:none; padding:15px; border-radius:4px; font-weight:bold; cursor:pointer; transition:0.3s;">変更を保存</button>
+            <button onclick="toggleEdit()" style="flex:1; background:#4a5568; color:white; border:none; padding:15px; border-radius:4px; cursor:pointer;">キャンセル</button>
         </div>
-        <button onclick="deletePost()" class="btn-danger-fill" style="width:100%; padding:12px; margin-top:20px; font-size: 1rem;">この投稿を完全に削除する</button>
+        <button onclick="deletePost()" style="width:100%; padding:12px; margin-top:20px; background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer;">この投稿を完全に削除</button>
     </div>
 
-    <div class="main-content">
-        <div class="slider-column">
+    <div class="main-content" style="display: flex; gap: 30px; margin-bottom: 25px;">
+        <div style="flex: 1.5; min-width: 0;">
             <div class="slider-outer">
                 <button class="slide-btn prev" onclick="moveSlide('main', -1)">❮</button>
                 <div class="slider-viewport"><div class="slide-track" id="main-track"></div></div>
                 <button class="slide-btn next" onclick="moveSlide('main', 1)">❯</button>
             </div>
         </div>
-        <div class="info-column">
+        <div style="flex: 1;">
             <div class="section">
-                <div class="author-info-box">
-                    <div class="author-flex" id="author-container"></div>
-                </div>
-                <h3>アバター： <span id="display-avatar" style="color: #fff;"></span></h3>
-                <h4 class="used-title">使用したもの</h4>
-                <ul id="display-used-list"></ul>
+                <div id="author-container"></div>
+                <h3>アバター： <span id="display-avatar" style="color:#fff;"></span></h3>
+                <h4 style="color:#00f2ff; margin-top:20px;">使用したもの</h4>
+                <ul id="display-used-list" style="list-style:none; padding:0;"></ul>
             </div>
         </div>
     </div>
 
     <div class="section">
         <h3>改変の手順・メモ</h3>
-        <p id="display-method"></p>
-        <div id="sub-slider-area" class="slider-outer" style="display: none; margin-top: 30px;">
+        <p id="display-method" style="white-space: pre-wrap; line-height:1.8; color:#fff;"></p>
+        <div id="sub-slider-area" class="slider-outer" style="display:none; margin-top:30px;">
             <button class="slide-btn prev" onclick="moveSlide('sub', -1)">❮</button>
-            <div class="slider-viewport" style="height: 350px;"><div class="slide-track" id="sub-track"></div></div>
+            <div class="slider-viewport" style="height:350px;"><div class="slide-track" id="sub-track"></div></div>
             <button class="slide-btn next" onclick="moveSlide('sub', 1)">❯</button>
         </div>
     </div>
 
-    <div id="ref-box" class="section" style="display: none;">
+    <div id="display-ref-area" class="section" style="display:none;">
         <h3>参考投稿</h3>
-        <ul id="display-ref-list"></ul>
+        <div id="display-ref-list" style="padding:10px 0; display:flex; flex-direction:column; gap:12px;"></div>
     </div>
 
     <div class="section">
         <h3>コメント</h3>
         <div id="comment-list"></div>
         <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-            <textarea id="comment-body-input" style="background:rgba(255,255,255,0.05); border:1px solid rgba(0,242,255,0.3); color:#fff; padding:12px; border-radius:4px;" rows="3" placeholder="コメントを入力..."></textarea>
+            <textarea id="comment-body-input" style="background:rgba(255,255,255,0.05); border:1px solid rgba(0,242,255,0.3); color:#fff; padding:12px; border-radius:4px; font-family:inherit;" rows="3" placeholder="コメントを入力..."></textarea>
             <button onclick="submitComment()" style="align-self:flex-end; background:#3a7bd5; color:white; border:none; padding:10px 25px; border-radius:4px; cursor:pointer; font-weight:bold;">投稿する</button>
         </div>
     </div>
@@ -215,7 +240,8 @@
 
 <script src="common.js"></script>
 <script>
-    let allPosts = []; let allUsers = []; let currentPost = {}; let postId = null; const currentPos = { main: 0, sub: 0 };
+    let allPosts = []; let allUsers = []; let currentPost = {}; let postId = null;
+    const currentPos = { main: 0, sub: 0 };
     
     window.onload = async () => {
         const params = new URLSearchParams(window.location.search);
@@ -236,59 +262,46 @@
     function renderAll() {
         const author = allUsers.find(u => u.id === currentPost.authorId) || {};
         const authorName = author.nickname || currentPost.authorName || "不明";
-        let avatarHtml = author.avatarUrl ? `<img src="${author.avatarUrl}" class="author-avatar-img">` : `<div class="author-avatar-placeholder">${(authorName[0] || "?").toUpperCase()}</div>`;
-
+        
+        let avatarHtml = author.avatarUrl 
+            ? `<img src="${author.avatarUrl}" class="author-avatar" style="width:50px; height:50px; border-radius:50%; border:2px solid #00f2ff; object-fit:cover;">` 
+            : `<div class="author-avatar" style="width:50px; height:50px; border-radius:50%; background:#444; color:#fff; display:flex; align-items:center; justify-content:center; border:2px solid #00f2ff;">${(authorName[0] || "?").toUpperCase()}</div>`;
+        
         document.getElementById('author-container').innerHTML = `
-            <a href="profile.html?id=${currentPost.authorId}" style="text-decoration:none;">${avatarHtml}</a>
-            <div class="author-info-text-group">
-                <div class="author-label">POSTED BY</div>
-                <a href="profile.html?id=${currentPost.authorId}" class="author-name-text">${authorName}</a>
-                <div class="author-id-text">(ID: ${currentPost.authorId || "---"})</div>
+            <div style="padding-bottom:15px; border-bottom:1px dashed rgba(0,242,255,0.3); margin-bottom:15px;">
+                <a href="profile.html?id=${currentPost.authorId}" class="author-link">
+                    ${avatarHtml}
+                    <div>
+                        <div style="font-size:0.7rem; color:#00f2ff; margin-bottom:2px;">POSTED BY</div>
+                        <div class="author-name" style="color:#fff; font-weight:bold; transition:0.3s;">${authorName}</div>
+                    </div>
+                </a>
             </div>`;
 
         document.getElementById('display-title').innerText = currentPost.title || "無題";
         document.getElementById('display-avatar').innerText = currentPost.avatarName || "未設定";
         document.getElementById('display-method').innerText = currentPost.methodText || "";
+        
+        // 追加: タグの描画
+        const tagContainer = document.getElementById('display-tags');
+        if (currentPost.tags && currentPost.tags.length > 0) {
+            tagContainer.innerHTML = currentPost.tags.map(t => `<a href="index.html?tag=${encodeURIComponent(t)}" class="tag-link">#${t}</a>`).join('');
+        } else {
+            tagContainer.innerHTML = "";
+        }
+
+        const refUrls = currentPost.referencePostUrls || [];
+        if (refUrls.length > 0) {
+            document.getElementById('display-ref-area').style.display = "block";
+            document.getElementById('display-ref-list').innerHTML = refUrls.map(url => `<a href="${url}" target="_blank">🔗 ${url}</a>`).join('');
+        } else { document.getElementById('display-ref-area').style.display = "none"; }
+
         document.getElementById('main-track').innerHTML = (currentPost.mainImgs || []).map(src => `<img src="${src}">`).join('');
         if (currentPost.subImgs && currentPost.subImgs.length > 0) {
             document.getElementById('sub-slider-area').style.display = "block";
             document.getElementById('sub-track').innerHTML = currentPost.subImgs.map(src => `<img src="${src}">`).join('');
         }
         document.getElementById('display-used-list').innerHTML = (currentPost.usedItems || []).map(item => `<li><a href="${item.url}" target="_blank">🔗 ${item.name}</a></li>`).join('');
-        if (currentPost.refUrls && currentPost.refUrls.length > 0) {
-            document.getElementById('ref-box').style.display = "block";
-            document.getElementById('display-ref-list').innerHTML = currentPost.refUrls.map(url => `<li><a href="${url}" target="_blank">🔗 ${url}</a></li>`).join('');
-        }
-        document.getElementById('like-count').innerText = currentPost.likes || 0;
-    }
-
-    function toggleLike() {
-        const userId = localStorage.getItem('userId') || 'guest';
-        if (!currentPost.likedBy) currentPost.likedBy = [];
-        const index = currentPost.likedBy.indexOf(userId);
-        if (index === -1) {
-            currentPost.likedBy.push(userId);
-            currentPost.likes = (currentPost.likes || 0) + 1;
-        } else {
-            currentPost.likedBy.splice(index, 1);
-            currentPost.likes = Math.max(0, (currentPost.likes || 0) - 1);
-        }
-        updateLikeUI();
-        savePostData();
-    }
-
-    function updateLikeUI() {
-        const userId = localStorage.getItem('userId') || 'guest';
-        const btn = document.getElementById('like-button');
-        document.getElementById('like-count').innerText = currentPost.likes || 0;
-        if (currentPost.likedBy && currentPost.likedBy.includes(userId)) btn.classList.add('active');
-        else btn.classList.remove('active');
-    }
-
-    async function savePostData() {
-        const idx = allPosts.findIndex(p => p.id == postId);
-        allPosts[idx] = currentPost;
-        await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) });
     }
 
     function toggleEdit() {
@@ -298,24 +311,142 @@
             document.getElementById('input-title').value = currentPost.title || "";
             document.getElementById('input-avatar').value = currentPost.avatarName || "";
             document.getElementById('input-method').value = currentPost.methodText || "";
+            // 追加: タグを文字列に戻して表示
+            document.getElementById('input-tags').value = (currentPost.tags || []).join(" ");
+            
             document.getElementById('used-items-edit-list').innerHTML = "";
             (currentPost.usedItems || []).forEach(item => addUsedItemInput(item.name, item.url));
-            document.getElementById('url-list-edit').innerHTML = "";
-            (currentPost.refUrls || []).forEach(url => addUrlInputEdit(url));
+            document.getElementById('ref-urls-edit-list').innerHTML = "";
+            (currentPost.referencePostUrls || []).forEach(url => addRefUrlInput(url));
             renderEditPreviews('main', currentPost.mainImgs || []);
             renderEditPreviews('sub', currentPost.subImgs || []);
         } else { f.style.display = "none"; }
     }
 
+    function addUsedItemInput(name = "", url = "") {
+        const div = document.createElement('div'); div.className = 'row-item';
+        div.innerHTML = `<input type="text" class="used-item-name" placeholder="名前" value="${name}"><input type="url" class="used-item-url" style="flex:2" placeholder="URL" value="${url}"><button class="btn-row-del" onclick="this.parentElement.remove()">×</button>`;
+        document.getElementById('used-items-edit-list').appendChild(div);
+    }
+
+    function addRefUrlInput(url = "") {
+        const div = document.createElement('div'); div.className = 'row-item';
+        div.innerHTML = `<input type="url" class="ref-url-input" placeholder="https://..." value="${url}"><button class="btn-row-del" onclick="this.parentElement.remove()">×</button>`;
+        document.getElementById('ref-urls-edit-list').appendChild(div);
+    }
+
+    async function updatePost() {
+        currentPost.title = document.getElementById('input-title').value;
+        currentPost.avatarName = document.getElementById('input-avatar').value;
+        currentPost.methodText = document.getElementById('input-method').value;
+        
+        // 追加: タグを配列に変換して保存
+        const tagInput = document.getElementById('input-tags').value;
+        currentPost.tags = tagInput.split(/[ 　]+/).filter(t => t.trim() !== "");
+
+        currentPost.usedItems = Array.from(document.querySelectorAll('.used-item-name')).map((n, i) => ({ name: n.value, url: document.querySelectorAll('.used-item-url')[i].value })).filter(item => item.name);
+        currentPost.referencePostUrls = Array.from(document.querySelectorAll('.ref-url-input')).map(el => el.value).filter(v => v.trim());
+        await savePostData(); location.reload();
+    }
+
+    /* --- コメント機能 --- */
+    function renderComments() {
+        const container = document.getElementById('comment-list');
+        const currentUserId = localStorage.getItem('userId');
+        if (!currentPost.comments || currentPost.comments.length === 0) {
+            container.innerHTML = '<p style="color:rgba(255,255,255,0.3); font-size:0.9rem;">まだコメントはありません。</p>';
+            return;
+        }
+        container.innerHTML = currentPost.comments.map((c, index) => {
+            const initial = (c.authorName || "?")[0].toUpperCase();
+            const dateStr = c.date ? new Date(c.date).toLocaleString('ja-JP', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : "";
+            const isMyComment = (c.authorId === currentUserId || localStorage.getItem('role') === 'admin');
+            const replies = c.replies || [];
+            return `
+                <div class="comment-item">
+                    <div class="comment-avatar">${initial}</div>
+                    <div class="comment-info">
+                        <div class="comment-header">
+                            <div><span class="comment-author" onclick="openReplyBox(${index}, '${c.authorName}')">${c.authorName}</span><span class="comment-date">${dateStr}</span></div>
+                            ${isMyComment ? `<button class="comment-menu-trigger" onclick="toggleCommentMenu(event, ${index})">⋮</button>
+                            <div class="comment-dropdown" id="dropdown-${index}">
+                                <button onclick="deleteComment(${index})" style="color:#ff4d4d;">🗑 削除</button>
+                            </div>` : ""}
+                        </div>
+                        <div class="comment-text">${c.text}</div>
+                        <div class="comment-actions">
+                            ${replies.length > 0 ? `<button class="toggle-replies-btn" onclick="toggleReplies(event, ${index})">▼ ${replies.length} 件の返信</button>` : "<div></div>"}
+                            <button class="btn-reply-trigger" onclick="openReplyBox(${index}, '${c.authorName}')">返信</button>
+                        </div>
+                        <div class="reply-input-box" id="reply-box-${index}">
+                            <textarea id="reply-text-${index}" class="reply-textarea" placeholder="${c.authorName}さんに返信..."></textarea>
+                            <div style="text-align:right; margin-top:8px;"><button onclick="submitReply(${index})" style="background:#00f2ff; color:#000; border:none; padding:8px 20px; border-radius:4px; font-weight:bold; cursor:pointer;">投稿</button></div>
+                        </div>
+                        <div class="replies-container" id="replies-container-${index}">
+                            ${replies.map(r => `
+                                <div class="reply-item">
+                                    <div class="reply-avatar">${(r.authorName || "?")[0]}</div>
+                                    <div style="flex:1;">
+                                        <span class="comment-author" onclick="openReplyBox(${index}, '${r.authorName}')">${r.authorName}</span>
+                                        <div class="comment-text" style="font-size:0.85rem;">${r.text}</div>
+                                    </div>
+                                </div>`).join('')}
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    async function submitComment() {
+        const input = document.getElementById('comment-body-input');
+        if (!input.value.trim()) return;
+        if (!currentPost.comments) currentPost.comments = [];
+        currentPost.comments.push({ authorId: localStorage.getItem('userId') || 'guest', authorName: localStorage.getItem('userNickname') || "ゲスト", text: input.value, date: new Date().toISOString(), replies: [] });
+        input.value = ""; renderComments(); await savePostData();
+    }
+
+    function openReplyBox(index, authorName) {
+        document.querySelectorAll('.reply-input-box').forEach(el => el.style.display = 'none');
+        const box = document.getElementById(`reply-box-${index}`);
+        box.style.display = 'block';
+        const textarea = document.getElementById(`reply-text-${index}`);
+        textarea.value = `@${authorName} `;
+        textarea.focus();
+    }
+
+    async function submitReply(index) {
+        const input = document.getElementById(`reply-text-${index}`);
+        if (!input.value.trim()) return;
+        if (!currentPost.comments[index].replies) currentPost.comments[index].replies = [];
+        currentPost.comments[index].replies.push({ authorId: localStorage.getItem('userId') || 'guest', authorName: localStorage.getItem('userNickname') || "ゲスト", text: input.value, date: new Date().toISOString() });
+        input.value = ""; renderComments(); await savePostData();
+    }
+
+    function toggleReplies(event, index) {
+        const container = document.getElementById(`replies-container-${index}`);
+        container.style.display = (container.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function toggleCommentMenu(event, index) {
+        event.stopPropagation(); closeAllMenus();
+        document.getElementById(`dropdown-${index}`).style.display = 'flex';
+    }
+
+    function closeAllMenus() { document.querySelectorAll('.comment-dropdown').forEach(el => el.style.display = 'none'); }
+
+    async function deleteComment(index) {
+        if (confirm("削除しますか？")) { currentPost.comments.splice(index, 1); renderComments(); await savePostData(); }
+    }
+
+    /* --- スライダー・画像・保存系 --- */
     function initDropZone(id, key) {
         const zone = document.getElementById(id);
-        if(!zone) return;
-        zone.addEventListener('dragover', (e) => e.preventDefault());
-        zone.addEventListener('drop', (e) => {
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', e => {
             e.preventDefault();
             Array.from(e.dataTransfer.files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
+                reader.onload = ev => {
                     if (!currentPost[key + 'Imgs']) currentPost[key + 'Imgs'] = [];
                     currentPost[key + 'Imgs'].push(ev.target.result);
                     renderEditPreviews(key, currentPost[key + 'Imgs']);
@@ -327,66 +458,54 @@
 
     function renderEditPreviews(key, imgs) {
         const container = document.getElementById(`preview-${key}-edit`);
-        if(!container) return;
-        container.innerHTML = imgs.map((src, i) => `<div class="thumb-wrapper"><img src="${src}"><button class="del-btn" onclick="removeImgEdit('${key}', ${i})">×</button></div>`).join('');
+        container.innerHTML = imgs.map((src, i) => `<div class="thumb-wrapper"><img src="${src}"><button class="del-btn" style="position:absolute; top:0; right:0; background:#ff4d4d; color:white; border:none; cursor:pointer; width:20px; height:20px; font-size:12px;" onclick="removeImgEdit('${key}', ${index})">×</button></div>`).join('');
     }
 
     function removeImgEdit(key, index) {
-        if (key === 'main') currentPost.mainImgs.splice(index, 1);
-        else currentPost.subImgs.splice(index, 1);
-        renderEditPreviews(key, (key === 'main' ? currentPost.mainImgs : currentPost.subImgs));
-    }
-
-    function addUsedItemInput(name = "", url = "") {
-        const div = document.createElement('div'); div.className = 'row-item';
-        div.innerHTML = `<input type="text" class="used-item-name" style="flex:1" placeholder="アイテム名" value="${name}"><input type="url" class="used-item-url" style="flex:2" placeholder="URL" value="${url}"><button class="btn-row-del" onclick="this.parentElement.remove()">×</button>`;
-        document.getElementById('used-items-edit-list').appendChild(div);
-    }
-
-    function addUrlInputEdit(url = "") {
-        const div = document.createElement('div'); div.className = 'row-item';
-        div.innerHTML = `<input type="url" class="ref-url-input" style="flex:1" placeholder="https://..." value="${url}"><button class="btn-row-del" onclick="this.parentElement.remove()">×</button>`;
-        document.getElementById('url-list-edit').appendChild(div);
-    }
-
-    function updatePost() {
-        currentPost.title = document.getElementById('input-title').value;
-        currentPost.avatarName = document.getElementById('input-avatar').value;
-        currentPost.methodText = document.getElementById('input-method').value;
-        currentPost.usedItems = Array.from(document.querySelectorAll('.used-item-name')).map((n, i) => ({ name: n.value, url: document.querySelectorAll('.used-item-url')[i].value })).filter(item => item.name);
-        currentPost.refUrls = Array.from(document.querySelectorAll('.ref-url-input')).map(inpt => inpt.value).filter(url => url);
-        const idx = allPosts.findIndex(p => p.id == postId);
-        allPosts[idx] = currentPost;
-        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) }).then(() => location.reload());
-    }
-
-    function deletePost() {
-        if (!confirm('削除しますか？')) return;
-        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts.filter(p => p.id != postId)) }).then(() => { window.location.href = 'list.html'; });
+        currentPost[key + 'Imgs'].splice(index, 1); renderEditPreviews(key, currentPost[key + 'Imgs']);
     }
 
     function moveSlide(key, dir) {
-        const imgs = (key === 'main') ? currentPost.mainImgs : currentPost.subImgs;
-        if (!imgs || imgs.length <= 1) return;
+        const imgs = currentPost[key + 'Imgs'] || [];
+        if (imgs.length <= 1) return;
         currentPos[key] = (currentPos[key] + dir + imgs.length) % imgs.length;
         document.getElementById(key + '-track').style.transform = `translateX(-${currentPos[key] * 100}%)`;
     }
 
-    function renderComments() {
-        document.getElementById('comment-list').innerHTML = (currentPost.comments || []).map(c => `<div style="border-bottom:1px solid rgba(255,255,255,0.1); padding:15px 0;"><div class="comment-author">${c.authorName}</div><div class="comment-text">${c.text}</div></div>`).join('');
+    async function savePostData() {
+        const idx = allPosts.findIndex(p => p.id == postId);
+        if (idx !== -1) { allPosts[idx] = currentPost; await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) }); }
     }
 
-    function submitComment() {
-        const text = document.getElementById('comment-body-input').value;
-        if (!text.trim()) return;
-        if (!currentPost.comments) currentPost.comments = [];
-        currentPost.comments.push({ authorName: localStorage.getItem('userNickname') || "ゲスト", text: text });
-        savePostData().then(() => { document.getElementById('comment-body-input').value = ""; renderComments(); });
+    async function deletePost() {
+        if (!confirm('投稿を完全に削除しますか？')) return;
+        const filtered = allPosts.filter(p => p.id != postId);
+        await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filtered) });
+        window.location.href = 'list.html';
     }
 
     function checkPermission() {
         const userId = localStorage.getItem('userId');
-        if (currentPost.authorId === userId || localStorage.getItem('role') === 'admin') document.getElementById('edit-trigger-btn').style.display = 'block';
+        if (currentPost.authorId === userId || localStorage.getItem('role') === 'admin') {
+            document.getElementById('edit-trigger-btn').style.display = 'block';
+        }
+    }
+
+    function updateLikeUI() {
+        const userId = localStorage.getItem('userId') || 'guest';
+        document.getElementById('like-count').innerText = currentPost.likes || 0;
+        const btn = document.getElementById('like-button');
+        if (currentPost.likedBy && currentPost.likedBy.includes(userId)) btn.classList.add('active');
+        else btn.classList.remove('active');
+    }
+
+    async function toggleLike() {
+        const userId = localStorage.getItem('userId') || 'guest';
+        if (!currentPost.likedBy) currentPost.likedBy = [];
+        const idx = currentPost.likedBy.indexOf(userId);
+        if (idx === -1) { currentPost.likedBy.push(userId); currentPost.likes = (currentPost.likes || 0) + 1; }
+        else { currentPost.likedBy.splice(idx, 1); currentPost.likes = Math.max(0, (currentPost.likes || 0) - 1); }
+        updateLikeUI(); await savePostData();
     }
 </script>
 </body>

@@ -67,22 +67,17 @@
 </div>
 
 <script>
-    // ★重要：ここに追加！現在のモードを覚える箱（変数）を作ります
     let mode = 'login'; 
 
-    // switchTab 関数に ニックネーム欄の表示切り替えを追加
     function switchTab(newMode) {
-        mode = newMode; // これで上の let mode に代入されます
+        mode = newMode;
         document.getElementById('tab-login').className = mode === 'login' ? 'tab active' : 'tab';
         document.getElementById('tab-register').className = mode === 'register' ? 'tab active' : 'tab';
         document.getElementById('page-title').innerText = mode === 'login' ? 'LOGIN' : 'REGISTER';
         document.getElementById('submit-text').innerText = mode === 'login' ? 'ログインする' : '新しく登録する';
-        
-        // 登録のときだけニックネーム欄を出す
         document.getElementById('nickname-area').style.display = mode === 'register' ? 'block' : 'none';
     }
 
-    // --- 以下、送信処理（onsubmit）は今のままでOKです ---
     document.getElementById('auth-form').onsubmit = async (e) => {
         e.preventDefault();
         const id = document.getElementById('user-id').value;
@@ -105,11 +100,32 @@
                     alert("登録完了！ログインしてください。");
                     switchTab('login');
                 } else {
+                    // 1. 基本情報を一旦保存
                     localStorage.setItem('userId', data.user.id);
-                    localStorage.setItem('userNickname', data.user.nickname || data.user.id); 
                     localStorage.setItem('userRole', data.user.role);
-                    alert(`ようこそ、${data.user.nickname || data.user.id}さん！`);
-                    window.location.href = 'index.html';
+
+                    // 2. 【超重要】最新のアバターとニックネームを全ユーザーリストから直接取得
+                    try {
+                        const usersRes = await fetch('/api/users');
+                        const users = await usersRes.json();
+                        const me = users.find(u => u.id === data.user.id);
+                        if (me) {
+                            localStorage.setItem('userNickname', me.nickname || me.id);
+                            localStorage.setItem('userAvatar', me.avatarUrl || '');
+                        } else {
+                            localStorage.setItem('userNickname', data.user.nickname || data.user.id);
+                            localStorage.setItem('userAvatar', data.user.avatarUrl || '');
+                        }
+                    } catch (e) {
+                        // エラー時はフォールバック
+                        localStorage.setItem('userNickname', data.user.nickname || data.user.id);
+                        localStorage.setItem('userAvatar', data.user.avatarUrl || '');
+                    }
+
+                    alert(`ようこそ、${localStorage.getItem('userNickname')}さん！`);
+                    
+                    // 3. キャッシュを回避するためにタイムスタンプを付けて遷移
+                    window.location.href = 'index.html?v=' + new Date().getTime();
                 }
             } else {
                 alert("エラー: " + data.message);

@@ -43,6 +43,10 @@
             }
         ],
         "id": 1768561816378,
+        "likedBy": [
+            "see"
+        ],
+        "likes": 1,
         "mainImgs": [
             "/static/uploads/2026-01-16/1768561797_IMG_5711.jpeg",
             "/static/uploads/2026-01-16/1768561797_IMG_5715.jpeg"
@@ -86,15 +90,43 @@
         "authorId": "see",
         "authorName": "see",
         "avatarName": "ヴぁ",
+        "comments": [
+            {
+                "authorId": "see",
+                "authorName": "see",
+                "date": "2026-01-19T01:30:44.729Z",
+                "replies": [
+                    {
+                        "authorId": "see",
+                        "authorName": "see",
+                        "date": "2026-01-19T02:36:43.088Z",
+                        "text": "@see おいさｊふぃそｊｆさいｊｆｓ"
+                    },
+                    {
+                        "authorId": "see",
+                        "authorName": "see",
+                        "date": "2026-01-19T02:38:57.365Z",
+                        "text": "@see "
+                    }
+                ],
+                "text": "な"
+            }
+        ],
         "id": 1768747329786,
-        "likedBy": [],
-        "likes": 0,
+        "likedBy": [
+            "see"
+        ],
+        "likes": 1,
         "mainImgs": [
             "/static/uploads/2026-01-18/1768747312_スクリーンショット 2025-10-03 113103.png"
         ],
         "methodText": "キャンセルラッシュはがんばれ",
         "refUrls": [
             "ca"
+        ],
+        "referencePostUrl": "va",
+        "referencePostUrls": [
+            "vあ"
         ],
         "subImgs": [],
         "title": "プロフとアイコンできたよ",
@@ -104,5 +136,26 @@
                 "url": "https://www.youtube.com/watch?v=KzITEaavf7c"
             }
         ]
+    },
+    {
+        "id": 1768833461375,
+        "title": "あ",
+        "authorId": "see",
+        "authorName": "see",
+        "avatarName": "あ",
+        "tags": [
+            "あふぁ",
+            "ふぁふぁｆ"
+        ],
+        "usedItems": [
+            {
+                "name": "",
+                "url": ""
+            }
+        ],
+        "methodText": "",
+        "mainImgs": [],
+        "subImgs": [],
+        "refUrls": []
     }
 ]
