@@ -37,58 +37,47 @@
         .card-img { width: 100%; height: 180px; object-fit: cover; background: #1a1f2e; }
         .card-content { padding: 15px; }
         .card-title { font-size: 1.1rem; font-weight: bold; margin: 0; color: #fff; }
-        .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; }
+        .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; margin-bottom: 12px; }
 
-        /* --- 投稿者情報エリア --- */
-        .card-author-row {
+        /* --- いいねボタンと投稿者の横並び設定 --- */
+        .card-footer-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 10px;
-            position: relative; 
-            z-index: 5;
+            gap: 12px;
         }
-        .author-clickable {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+
+        /* --- ミニいいねボタン --- */
+        .btn-like-mini {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 77, 109, 0.2);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .author-clickable:hover {
-            filter: brightness(1.3);
-        }
-        .author-clickable:hover .card-author-name {
-            text-decoration: underline;
-        }
-
-        .mini-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #334155;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-        }
-        .mini-avatar-placeholder {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00f2ff, #0066ff);
-            color: white;
-            font-size: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            gap: 4px;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            z-index: 20;
         }
-        .card-author-name {
-            font-size: 0.75rem;
-            color: #00f2ff;
-            text-decoration: none;
-            font-weight: bold;
-            opacity: 0.9;
+        .btn-like-mini.active {
+            background: rgba(255, 77, 109, 0.2);
+            border-color: #ff4d6d;
+            color: #ff4d6d;
+            box-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
         }
+        .btn-like-mini:active .mini-heart { transform: scale(1.4); }
+        .mini-heart { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
+
+        .card-author-row { display: flex; align-items: center; gap: 8px; position: relative; z-index: 10; }
+        .author-clickable { display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
+        .author-clickable:hover { filter: brightness(1.3); }
+        .author-clickable:hover .card-author-name { text-decoration: underline; }
+
+        .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #334155; border: 1px solid rgba(0, 242, 255, 0.3); }
+        .mini-avatar-placeholder { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .card-author-name { font-size: 0.75rem; color: #00f2ff; text-decoration: none; font-weight: bold; opacity: 0.9; }
 
         /* --- FABボタン --- */
         .fab-button { 
@@ -151,6 +140,8 @@
 
     function renderPosts(posts) {
         const container = document.getElementById('post-list');
+        const userId = localStorage.getItem('userId') || 'guest';
+
         if (!posts || posts.length === 0) {
             container.innerHTML = '<p style="color:rgba(255,255,255,0.5);">投稿が見つかりませんでした。</p>';
             return;
@@ -159,14 +150,11 @@
         container.innerHTML = [...posts].reverse().map(post => {
             const author = allUsers.find(u => u.id === post.authorId) || {};
             const displayName = author.nickname || post.authorName || "不明";
+            const isLiked = post.likedBy && post.likedBy.includes(userId);
             
-            let avatarHtml;
-            if (author.avatarUrl) {
-                avatarHtml = `<img src="${author.avatarUrl}" class="mini-avatar" alt="">`;
-            } else {
-                const initial = displayName.substring(0, 1).toUpperCase();
-                avatarHtml = `<div class="mini-avatar-placeholder">${initial}</div>`;
-            }
+            let avatarHtml = author.avatarUrl 
+                ? `<img src="${author.avatarUrl}" class="mini-avatar" alt="">`
+                : `<div class="mini-avatar-placeholder">${displayName.substring(0, 1).toUpperCase()}</div>`;
 
             return `
                 <div class="post-card">
@@ -176,10 +164,18 @@
                             <h3 class="card-title">${post.title || "無題"}</h3>
                             <div class="card-avatar">アバター: ${post.avatarName || "未設定"}</div>
                             
-                            <div class="card-author-row">
-                                <div class="author-clickable" onclick="event.preventDefault(); location.href='profile.html?id=${post.authorId}'">
-                                    ${avatarHtml}
-                                    <span class="card-author-name">${displayName}</span>
+                            <div class="card-footer-info">
+                                <button class="btn-like-mini ${isLiked ? 'active' : ''}" 
+                                        onclick="handleLikeClick(event, ${post.id})">
+                                    <span class="mini-heart">❤️</span>
+                                    <span id="mini-like-count-${post.id}">${post.likes || 0}</span>
+                                </button>
+
+                                <div class="card-author-row">
+                                    <div class="author-clickable" onclick="event.preventDefault(); location.href='profile.html?id=${post.authorId}'">
+                                        ${avatarHtml}
+                                        <span class="card-author-name">${displayName}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -187,6 +183,45 @@
                 </div>
             `;
         }).join('');
+    }
+
+    // --- いいね処理の実装 ---
+    async function handleLikeClick(event, postId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const userId = localStorage.getItem('userId') || 'guest';
+        // 検索フィルタがかかっていても元のallPostsデータを更新する必要がある
+        const post = allPosts.find(p => p.id === postId);
+        if (!post) return;
+
+        if (!post.likedBy) post.likedBy = [];
+        const index = post.likedBy.indexOf(userId);
+
+        if (index === -1) {
+            post.likedBy.push(userId);
+            post.likes = (post.likes || 0) + 1;
+        } else {
+            post.likedBy.splice(index, 1);
+            post.likes = Math.max(0, (post.likes || 0) - 1);
+        }
+
+        // 表示の即時更新
+        const btn = event.currentTarget;
+        const countDisp = document.getElementById(`mini-like-count-${postId}`);
+        if(countDisp) countDisp.innerText = post.likes;
+        btn.classList.toggle('active', post.likedBy.includes(userId));
+
+        // サーバーへ保存
+        try {
+            await fetch('/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(allPosts)
+            });
+        } catch(e) {
+            console.error("保存失敗", e);
+        }
     }
 
     function filterPosts() {

@@ -39,72 +39,52 @@
     .card-img { width: 100%; height: 180px; background: #1a1f2e; object-fit: cover; }
     .card-content { padding: 15px; }
     .card-title { font-size: 1.1rem; font-weight: bold; margin: 0; color: #fff; }
-    .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; }
+    .card-avatar { font-size: 0.85rem; color: #a0aec0; margin-top: 5px; margin-bottom: 12px; }
     
-    .card-author-row {
+    /* --- 新：情報の横並び設定 --- */
+    .card-footer-info {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-top: 10px;
-        position: relative;
-        z-index: 10;
+        gap: 12px; /* ボタンと投稿者の間隔 */
     }
-    .author-clickable {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+
+    /* --- ミニいいねボタン（横並び用） --- */
+    .btn-like-mini {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 77, 109, 0.2);
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 20px;
         cursor: pointer;
-        transition: 0.2s;
-    }
-    .author-clickable:hover {
-        filter: brightness(1.3);
-    }
-    .author-clickable:hover .card-author-name {
-        text-decoration: underline;
-    }
-
-    .mini-avatar {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #334155;
-        border: 1px solid rgba(0, 242, 255, 0.3);
-    }
-    .mini-avatar-placeholder {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #00f2ff, #0066ff);
-        color: white;
-        font-size: 10px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-weight: bold;
+        gap: 4px;
+        font-size: 0.8rem;
+        transition: 0.2s;
+        z-index: 20;
     }
-    .card-author-name {
-        font-size: 0.75rem;
-        color: #00f2ff;
-        text-decoration: none;
-        font-weight: bold;
-        opacity: 0.9;
+    .btn-like-mini.active {
+        background: rgba(255, 77, 109, 0.2);
+        border-color: #ff4d6d;
+        color: #ff4d6d;
+        box-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
     }
+    .btn-like-mini:active .mini-heart { transform: scale(1.4); }
+    .mini-heart { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block; }
 
-    .admin-link {
-        color: rgba(255, 255, 255, 0.2); text-decoration: none; font-size: 0.7rem; 
-        position: absolute; bottom: 10px; right: 10px; transition: 0.3s;
-    }
+    .card-author-row { display: flex; align-items: center; gap: 8px; position: relative; z-index: 10; }
+    .author-clickable { display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; }
+    .author-clickable:hover { filter: brightness(1.3); }
+    .author-clickable:hover .card-author-name { text-decoration: underline; }
+
+    .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #334155; border: 1px solid rgba(0, 242, 255, 0.3); }
+    .mini-avatar-placeholder { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .card-author-name { font-size: 0.75rem; color: #00f2ff; text-decoration: none; font-weight: bold; opacity: 0.9; }
+
+    .admin-link { color: rgba(255, 255, 255, 0.2); text-decoration: none; font-size: 0.7rem; position: absolute; bottom: 10px; right: 10px; transition: 0.3s; }
     .admin-link:hover { color: #ff0055; }
 
-    .fab-button { 
-        position: fixed; right: 30px; bottom: 30px; 
-        background: linear-gradient(135deg, #00f2ff, #0066ff); 
-        color: white; padding: 15px 25px; border-radius: 50px; 
-        display: flex; align-items: center; gap: 8px; 
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); z-index: 1000; 
-        text-decoration: none; font-weight: bold; 
-    }
+    .fab-button { position: fixed; right: 30px; bottom: 30px; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; padding: 15px 25px; border-radius: 50px; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); z-index: 1000; text-decoration: none; font-weight: bold; }
 
     @media (max-width: 768px) {
         .hero { padding: 40px 15px; clip-path: polygon(30px 0%, 100% 0%, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0% 100%, 0% 30px); }
@@ -144,8 +124,11 @@
 
 <script src="common.js"></script>
 <script>
+    let g_allPosts = []; 
+
     async function loadPosts() {
         const container = document.getElementById('post-list');
+        const userId = localStorage.getItem('userId') || 'guest';
         
         try {
             const [postsRes, usersRes] = await Promise.all([
@@ -153,25 +136,22 @@
                 fetch('/api/users')
             ]);
             
-            const allPosts = await postsRes.json();
+            g_allPosts = await postsRes.json();
             const allUsers = await usersRes.json();
 
-            if (!allPosts || allPosts.length === 0) {
+            if (!g_allPosts || g_allPosts.length === 0) {
                 container.innerHTML = 'まだ投稿がありません。';
                 return;
             }
 
-            container.innerHTML = allPosts.reverse().map(post => {
+            container.innerHTML = g_allPosts.slice().reverse().map(post => {
                 const author = allUsers.find(u => u.id === post.authorId) || {};
                 const displayName = author.nickname || post.authorName || "不明";
+                const isLiked = post.likedBy && post.likedBy.includes(userId);
                 
-                let avatarHtml;
-                if (author.avatarUrl) {
-                    avatarHtml = `<img src="${author.avatarUrl}" class="mini-avatar" alt="">`;
-                } else {
-                    const initial = displayName.substring(0, 1).toUpperCase();
-                    avatarHtml = `<div class="mini-avatar-placeholder">${initial}</div>`;
-                }
+                let avatarHtml = author.avatarUrl 
+                    ? `<img src="${author.avatarUrl}" class="mini-avatar" alt="">`
+                    : `<div class="mini-avatar-placeholder">${displayName.substring(0, 1).toUpperCase()}</div>`;
 
                 return `
                     <div class="post-card">
@@ -181,10 +161,18 @@
                                 <h3 class="card-title">${post.title || "無題"}</h3>
                                 <div class="card-avatar">アバター: ${post.avatarName || "未設定"}</div>
                                 
-                                <div class="card-author-row">
-                                    <div class="author-clickable" onclick="event.preventDefault(); location.href='profile.html?id=${post.authorId}'">
-                                        ${avatarHtml}
-                                        <span class="card-author-name">${displayName}</span>
+                                <div class="card-footer-info">
+                                    <button class="btn-like-mini ${isLiked ? 'active' : ''}" 
+                                            onclick="handleLikeClick(event, ${post.id})">
+                                        <span class="mini-heart">❤️</span>
+                                        <span id="mini-like-count-${post.id}">${post.likes || 0}</span>
+                                    </button>
+
+                                    <div class="card-author-row">
+                                        <div class="author-clickable" onclick="event.preventDefault(); location.href='profile.html?id=${post.authorId}'">
+                                            ${avatarHtml}
+                                            <span class="card-author-name">${displayName}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -198,6 +186,39 @@
         }
     }
 
+    async function handleLikeClick(event, postId) {
+        event.preventDefault(); 
+        event.stopPropagation(); 
+
+        const userId = localStorage.getItem('userId') || 'guest';
+        const post = g_allPosts.find(p => p.id === postId);
+        if (!post) return;
+
+        if (!post.likedBy) post.likedBy = [];
+        const index = post.likedBy.indexOf(userId);
+
+        if (index === -1) {
+            post.likedBy.push(userId);
+            post.likes = (post.likes || 0) + 1;
+        } else {
+            post.likedBy.splice(index, 1);
+            post.likes = Math.max(0, (post.likes || 0) - 1);
+        }
+
+        const btn = event.currentTarget;
+        const countDisp = document.getElementById(`mini-like-count-${postId}`);
+        if(countDisp) countDisp.innerText = post.likes;
+        btn.classList.toggle('active', post.likedBy.includes(userId));
+
+        try {
+            await fetch('/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(g_allPosts)
+            });
+        } catch(e) { console.error("Save failed", e); }
+    }
+
     if (typeof adminLogin !== 'function') {
         window.adminLogin = function() {
             const pass = prompt("管理者パスワードを入力してください:");
@@ -205,9 +226,7 @@
                 localStorage.setItem('role', 'admin');
                 alert("Masterとしてログインしました。");
                 location.reload();
-            } else {
-                alert("パスワードが違います。");
-            }
+            } else { alert("パスワードが違います。"); }
         };
     }
 

@@ -12,6 +12,37 @@
     .post-header { display: flex; align-items: center; gap: 20px; margin: 20px 0; justify-content: space-between; }
     .post-title-display { font-size: 2rem; font-weight: bold; color: #fff; text-shadow: 0 0 12px rgba(0, 242, 255, 0.8); margin: 0; }
 
+    /* --- いいねボタンのスタイル (ハート・ピンク・アニメーション) --- */
+    .actions-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+    .btn-like {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 77, 109, 0.3);
+        color: #fff;
+        padding: 8px 18px;
+        border-radius: 50px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+        font-weight: bold;
+    }
+    .btn-like:hover { background: rgba(255, 77, 109, 0.1); border-color: #ff4d6d; }
+    .btn-like.active {
+        background: rgba(255, 77, 109, 0.2);
+        border-color: #ff4d6d;
+        color: #ff4d6d;
+        box-shadow: 0 0 15px rgba(255, 77, 109, 0.4);
+    }
+    .like-icon { 
+        font-size: 1.1rem; 
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        display: inline-block;
+    }
+    .btn-like:active .like-icon { 
+        transform: scale(1.5); 
+    }
+
     /* --- メインコンテンツ --- */
     .main-content { display: flex; gap: 30px; margin-bottom: 25px; align-items: stretch; }
     .slider-column { flex: 1.5; min-width: 0; }
@@ -43,7 +74,6 @@
     .row-item { display: flex; gap: 8px; align-items: stretch; margin-top: 8px; }
     .row-item input { margin-top: 0 !important; }
 
-    /* 削除ボタン（×） */
     .btn-row-del { 
         background: #ff4d4d; color: white; border: none; width: 40px; min-width: 40px; 
         border-radius: 4px; cursor: pointer; font-weight: bold; display: flex; 
@@ -51,7 +81,6 @@
     }
     .btn-row-del:hover { background: #ff3333; }
 
-    /* 表示用リストのURLホバー（下線なし） */
     #display-used-list li a, #display-ref-list li a { color: #ffffff; text-decoration: none; display: block; padding: 5px 0; transition: 0.2s; }
     #display-used-list li a:hover, #display-ref-list li a:hover { color: #00f2ff; text-decoration: none; }
 
@@ -81,20 +110,12 @@
     .slide-btn { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 40px; color: #00f2ff; cursor: pointer; z-index: 10; text-shadow: 0 0 10px #00f2ff; }
     .prev { left: 0px; } .next { right: 0px; }
     
-    /* --- メディアクエリ (スマホ対応) --- */
     @media (max-width: 850px) { 
         .main-content { flex-direction: column; } 
         .slider-viewport { height: 350px; } 
         .info-column .section { height: auto; } 
-
         .post-title-display { font-size: 1.5rem; }
-        /* ボタン内の文字を横一列に小さく調整 */
-        .btn-edit-trigger { 
-            padding: 6px 12px; 
-            font-size: 0.75rem; 
-            white-space: nowrap; 
-            border-radius: 30px; 
-        } 
+        .btn-edit-trigger { padding: 6px 12px; font-size: 0.75rem; white-space: nowrap; border-radius: 30px; } 
         .post-header { gap: 10px; margin: 15px 0; }
     }
 </style>
@@ -118,6 +139,13 @@
     <div class="post-header">
         <h1 id="display-title" class="post-title-display">読み込み中...</h1>
         <button onclick="toggleEdit()" class="btn-edit-trigger" id="edit-trigger-btn">✎ 編集する</button>
+    </div>
+
+    <div class="actions-bar">
+        <button id="like-button" class="btn-like" onclick="toggleLike()">
+            <span class="like-icon">❤️</span>
+            <span id="like-count">0</span>
+        </button>
     </div>
 
     <div id="edit-form" class="edit-form-box">
@@ -200,6 +228,7 @@
             if (currentPost) { 
                 renderAll(); checkPermission(); renderComments();
                 initDropZone('drop-main', 'main'); initDropZone('drop-sub', 'sub');
+                updateLikeUI();
             }
         } catch(e) { console.error(e); }
     };
@@ -207,26 +236,15 @@
     function renderAll() {
         const author = allUsers.find(u => u.id === currentPost.authorId) || {};
         const authorName = author.nickname || currentPost.authorName || "不明";
-        
-        let avatarHtml;
-        if (author.avatarUrl) {
-            avatarHtml = `<img src="${author.avatarUrl}" class="author-avatar-img">`;
-        } else {
-            const initial = authorName[0] ? authorName[0].toUpperCase() : "?";
-            avatarHtml = `<div class="author-avatar-placeholder">${initial}</div>`;
-        }
+        let avatarHtml = author.avatarUrl ? `<img src="${author.avatarUrl}" class="author-avatar-img">` : `<div class="author-avatar-placeholder">${(authorName[0] || "?").toUpperCase()}</div>`;
 
-        const authorContainer = document.getElementById('author-container');
-        authorContainer.innerHTML = `
-            <a href="profile.html?id=${currentPost.authorId}" style="text-decoration:none;">
-                ${avatarHtml}
-            </a>
+        document.getElementById('author-container').innerHTML = `
+            <a href="profile.html?id=${currentPost.authorId}" style="text-decoration:none;">${avatarHtml}</a>
             <div class="author-info-text-group">
                 <div class="author-label">POSTED BY</div>
                 <a href="profile.html?id=${currentPost.authorId}" class="author-name-text">${authorName}</a>
                 <div class="author-id-text">(ID: ${currentPost.authorId || "---"})</div>
-            </div>
-        `;
+            </div>`;
 
         document.getElementById('display-title').innerText = currentPost.title || "無題";
         document.getElementById('display-avatar').innerText = currentPost.avatarName || "未設定";
@@ -241,6 +259,36 @@
             document.getElementById('ref-box').style.display = "block";
             document.getElementById('display-ref-list').innerHTML = currentPost.refUrls.map(url => `<li><a href="${url}" target="_blank">🔗 ${url}</a></li>`).join('');
         }
+        document.getElementById('like-count').innerText = currentPost.likes || 0;
+    }
+
+    function toggleLike() {
+        const userId = localStorage.getItem('userId') || 'guest';
+        if (!currentPost.likedBy) currentPost.likedBy = [];
+        const index = currentPost.likedBy.indexOf(userId);
+        if (index === -1) {
+            currentPost.likedBy.push(userId);
+            currentPost.likes = (currentPost.likes || 0) + 1;
+        } else {
+            currentPost.likedBy.splice(index, 1);
+            currentPost.likes = Math.max(0, (currentPost.likes || 0) - 1);
+        }
+        updateLikeUI();
+        savePostData();
+    }
+
+    function updateLikeUI() {
+        const userId = localStorage.getItem('userId') || 'guest';
+        const btn = document.getElementById('like-button');
+        document.getElementById('like-count').innerText = currentPost.likes || 0;
+        if (currentPost.likedBy && currentPost.likedBy.includes(userId)) btn.classList.add('active');
+        else btn.classList.remove('active');
+    }
+
+    async function savePostData() {
+        const idx = allPosts.findIndex(p => p.id == postId);
+        allPosts[idx] = currentPost;
+        await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) });
     }
 
     function toggleEdit() {
@@ -262,11 +310,10 @@
     function initDropZone(id, key) {
         const zone = document.getElementById(id);
         if(!zone) return;
-        zone.addEventListener('dragover', (e) => { e.preventDefault(); });
+        zone.addEventListener('dragover', (e) => e.preventDefault());
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
-            const files = Array.from(e.dataTransfer.files);
-            files.forEach(file => {
+            Array.from(e.dataTransfer.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     if (!currentPost[key + 'Imgs']) currentPost[key + 'Imgs'] = [];
@@ -306,13 +353,8 @@
         currentPost.title = document.getElementById('input-title').value;
         currentPost.avatarName = document.getElementById('input-avatar').value;
         currentPost.methodText = document.getElementById('input-method').value;
-        const names = document.querySelectorAll('.used-item-name');
-        const urls = document.querySelectorAll('.used-item-url');
-        currentPost.usedItems = [];
-        names.forEach((n, i) => { if(n.value) currentPost.usedItems.push({ name: n.value, url: urls[i].value }); });
-        const refIn = document.querySelectorAll('.ref-url-input');
-        currentPost.refUrls = [];
-        refIn.forEach(inpt => { if(inpt.value) currentPost.refUrls.push(inpt.value); });
+        currentPost.usedItems = Array.from(document.querySelectorAll('.used-item-name')).map((n, i) => ({ name: n.value, url: document.querySelectorAll('.used-item-url')[i].value })).filter(item => item.name);
+        currentPost.refUrls = Array.from(document.querySelectorAll('.ref-url-input')).map(inpt => inpt.value).filter(url => url);
         const idx = allPosts.findIndex(p => p.id == postId);
         allPosts[idx] = currentPost;
         fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) }).then(() => location.reload());
@@ -320,8 +362,7 @@
 
     function deletePost() {
         if (!confirm('削除しますか？')) return;
-        const filtered = allPosts.filter(p => p.id != postId);
-        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filtered) }).then(() => { window.location.href = 'list.html'; });
+        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts.filter(p => p.id != postId)) }).then(() => { window.location.href = 'list.html'; });
     }
 
     function moveSlide(key, dir) {
@@ -332,8 +373,7 @@
     }
 
     function renderComments() {
-        const list = document.getElementById('comment-list');
-        list.innerHTML = (currentPost.comments || []).map(c => `<div style="border-bottom:1px solid rgba(255,255,255,0.1); padding:15px 0;"><div class="comment-author">${c.authorName}</div><div class="comment-text">${c.text}</div></div>`).join('');
+        document.getElementById('comment-list').innerHTML = (currentPost.comments || []).map(c => `<div style="border-bottom:1px solid rgba(255,255,255,0.1); padding:15px 0;"><div class="comment-author">${c.authorName}</div><div class="comment-text">${c.text}</div></div>`).join('');
     }
 
     function submitComment() {
@@ -341,16 +381,12 @@
         if (!text.trim()) return;
         if (!currentPost.comments) currentPost.comments = [];
         currentPost.comments.push({ authorName: localStorage.getItem('userNickname') || "ゲスト", text: text });
-        const idx = allPosts.findIndex(p => p.id == postId);
-        allPosts[idx] = currentPost;
-        fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(allPosts) }).then(() => { document.getElementById('comment-body-input').value = ""; renderComments(); });
+        savePostData().then(() => { document.getElementById('comment-body-input').value = ""; renderComments(); });
     }
 
     function checkPermission() {
         const userId = localStorage.getItem('userId');
-        if (currentPost.authorId === userId || localStorage.getItem('role') === 'admin') {
-            document.getElementById('edit-trigger-btn').style.display = 'block';
-        }
+        if (currentPost.authorId === userId || localStorage.getItem('role') === 'admin') document.getElementById('edit-trigger-btn').style.display = 'block';
     }
 </script>
 </body>
